@@ -126,5 +126,5 @@ fun MainPreview(){
 @Preview(showBackground = true)
 @Composable
 fun MainPreview2(){
-    MainActivity()  
+    MainActivity()
 }
