@@ -22,11 +22,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material3.Dialog
 import androidx.wear.compose.material3.Text
+import com.example.wanderer.ui.theme.WandererTheme
 
 @Preview
 @Composable
 fun ActivityEditorPreview(){
-    ActivityEditor(onConfirm = {}, onCancel = {})
+    WandererTheme {
+        ActivityEditor(onConfirm = {}, onCancel = {})
+    }
 }
 
 
@@ -48,7 +51,7 @@ fun ActivityEditor(onConfirm: () -> Unit, onCancel: () -> Unit){
         // Save the data as a new activity to the file.
     }
 
-    Dialog(visible = true, onDismissRequest = {}){
+    Dialog(visible = true, onDismissRequest = onCancel){
         Column{
             // Top text
             Text("Create Activity")

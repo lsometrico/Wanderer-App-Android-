@@ -91,6 +91,18 @@ fun MainPreview(){
         text.value = "test2"
         textList.add("4")
     }
+
+    // Reloads the JSON.
+    fun reloadJson(){
+
+    }
+
+    // Called when a trip gets added.
+    // Passed to TripEditor.
+    fun tripAdded(){
+        reloadJson()
+    }
+
     // Main display thing.
     // Don't know what the theme means yet.
     WandererTheme {

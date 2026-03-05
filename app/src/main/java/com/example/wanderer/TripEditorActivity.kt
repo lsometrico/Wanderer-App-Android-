@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.example.wanderer
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,30 +29,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.window.Dialog
 import com.example.wanderer.ui.theme.WandererTheme
 import java.util.Date
 import java.util.Locale
 import kotlin.math.sqrt
 
-class TripEditorActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?){
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            TripEditor({ oldName, name, arrivalDate, departureDate ->
-                                    finalize(oldName, name, arrivalDate, departureDate) },
-                    {cancel()})
-        }
-    }
-
-    fun finalize(oldName: String, name: String, arrivalDate: Date, departureDate: Date){
-
-    }
-
-    fun cancel(){
-
-    }
-}
+//class TripEditorActivity : ComponentActivity() {
+//    override fun onCreate(savedInstanceState: Bundle?){
+//        super.onCreate(savedInstanceState)
+//        enableEdgeToEdge()
+//        setContent {
+//            TripEditor({ oldName, name, arrivalDate, departureDate ->
+//                                    finalize(oldName, name, arrivalDate, departureDate) },
+//                    {cancel()})
+//        }
+//    }
+//
+//    fun finalize(oldName: String, name: String, arrivalDate: Date, departureDate: Date){
+//
+//    }
+//
+//    fun cancel(){
+//
+//    }
+//}
 
 @Preview
 @Composable
@@ -64,7 +66,9 @@ fun TripEditorPreview(){
 
     }
 
-    TripEditor(::finalize_fn, ::cancel)
+    WandererTheme {
+        TripEditor(::cancel, ::cancel)
+    }
 }
 
 // An entire trip editor.
@@ -72,53 +76,82 @@ fun TripEditorPreview(){
 //   write the new data to JSON, and return an exit code of 1.
 // The cancel function should do nothing except return an exit code of 0.
 @Composable
-fun TripEditor(finalize: (oldName: String, name: String, arrivalDate: Date, departureDate: Date) -> Unit, cancel: () -> Unit){
-    val nameFieldVal = remember<MutableState<String>>({mutableStateOf("a")})
-    var name by nameFieldVal
-
-    var dialogueVal = remember{mutableStateOf(false)}
-    var openDialogue by dialogueVal
-
-    fun onValueChange(s: String){
-        openDialogue = true
-        name = s
-    }
+fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit){
+    // Trip name.
+    var name by remember<MutableState<String>>({mutableStateOf("")})
 
     val arrivalDate = rememberDatePickerState()
     val departureDate = rememberDatePickerState()
 
-    WandererTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Column{
-                Text(text = "Add/edit trip:",
-                    modifier = Modifier.padding(innerPadding)
-                )
-                Text(text = "Name:")
-                TextField(
-                    value = name,
-                    onValueChange = ::onValueChange
-                )
-                // Arrival Date picker
-                DatePopupPicker(arrivalDate)
-                // Departure Date picker
-                DatePopupPicker(departureDate)
-                // Confirm button
-                Button(onClick = {}){
-                    Text("Ok")
+    var warningText by remember{mutableStateOf("")}
+
+    // Run when a _new_ trip is created.
+    fun appendToJson(){
+        // Save the data of the trip to the JSON.
+    }
+
+    Dialog (onDismissRequest = onCancel){
+        Column {
+            // Top-of-menu text
+            // Color is there temporarily since for some reason it renders as black-on-black in the preview.
+            Text(text = "Add/edit trip:", color = androidx.compose.ui.graphics.Color.White)
+
+
+            // Trip name
+            // See above for color note.
+            Text(text = "Name:", color = androidx.compose.ui.graphics.Color.White)
+            TextField(
+                value = name,
+                onValueChange = {s -> name = s}
+            )
+
+
+            // Arrival Date picker
+            DatePopupPicker(arrivalDate, name = "Arrival Date")
+            // Departure Date picker
+            DatePopupPicker(departureDate, name = "Departure Date")
+
+
+            // Confirm button
+            Button(onClick = {
+                // Check to ensure that name, arrival, and departure are selected.
+                if (name == ""){
+                    warningText = "Must enter a name."
+                    return@Button
                 }
-                // Cancel button
-                Button(onClick = {}){
-                    Text("Cancel")
+                if (arrivalDate.selectedDateMillis == null){
+                    warningText = "Must select an arrival date."
+                    return@Button
                 }
+                if (departureDate.selectedDateMillis == null){
+                    warningText = "Must select a departure date."
+                    return@Button
+                }
+
+                // Then append to JSON and inform the caller of completion.
+                // Caller will probably respond by hiding this menu and reloading their JSON.
+                appendToJson()
+                onConfirm()
+            }) {
+                Text("Confirm")
             }
+
+
+            // Cancel button
+            Button(onClick = onCancel) {
+                Text("Cancel")
+            }
+
+            // Warning text, for invalid name and whatnot.
+            // See top-of-menu text for color note.
+            Text(warningText, color = androidx.compose.ui.graphics.Color.White)
         }
     }
 }
 
 @Composable
-fun DatePopupPicker(datePickerState: DatePickerState){
+fun DatePopupPicker(datePickerState: DatePickerState, name: String){
     var showDatePicker by remember { mutableStateOf(false) }
-//    val datePickerState = rememberDatePickerState()
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -137,6 +170,6 @@ fun DatePopupPicker(datePickerState: DatePickerState){
     }
 
     Button(onClick = { showDatePicker = true }) {
-        Text("Select Date")
+        Text(name)
     }
 }
