@@ -84,28 +84,8 @@ fun TripEditor(finalize: (oldName: String, name: String, arrivalDate: Date, depa
         name = s
     }
 
-    key(openDialogue) {
-        if (openDialogue) {
-            DatePickerDialog(
-                onDismissRequest = {},
-                confirmButton = {
-                    Button(){}
-                },
-                dismissButton = {
-                    Button(onClick = {openDialogue = false}){}
-                }
-
-            ) {
-
-            }
-        }
-    }
-
-    val arrivalDate = DatePickerState(locale = Locale.US)
-
-
-
-
+    val arrivalDate = rememberDatePickerState()
+    val departureDate = rememberDatePickerState()
 
     WandererTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -113,22 +93,32 @@ fun TripEditor(finalize: (oldName: String, name: String, arrivalDate: Date, depa
                 Text(text = "Add/edit trip:",
                     modifier = Modifier.padding(innerPadding)
                 )
+                Text(text = "Name:")
                 TextField(
                     value = name,
                     onValueChange = ::onValueChange
                 )
-                Button(onClick = {dialogueVal.value = true; name="abcd"}) { }
-                //DatePicker(state = arrivalDate)
-                datePicker()
+                // Arrival Date picker
+                DatePopupPicker(arrivalDate)
+                // Departure Date picker
+                DatePopupPicker(departureDate)
+                // Confirm button
+                Button(onClick = {}){
+                    Text("Ok")
+                }
+                // Cancel button
+                Button(onClick = {}){
+                    Text("Cancel")
+                }
             }
         }
     }
 }
 
 @Composable
-fun datePicker(){
+fun DatePopupPicker(datePickerState: DatePickerState){
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
+//    val datePickerState = rememberDatePickerState()
 
     if (showDatePicker) {
         DatePickerDialog(
