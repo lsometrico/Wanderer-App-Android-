@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +22,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.example.wanderer.ui.theme.WandererTheme
 
 
@@ -51,6 +55,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+class Trip
+constructor(name: String, arrivalDate: Long, departureDate: Long)
+{
+    val name: String = name
+    // Arrival & departure are time at start of date from epoch in milliseconds.
+    // Not fully sure which epoch. Should be obtained from DatePickerState.selectedDateMillis.
+    val arrivalDate: Long = arrivalDate
+    val departureDate: Long = departureDate
+}
 
 
 
@@ -86,11 +100,21 @@ fun MainPreview(){
     // A list of text that we can update, and associated UI elements will automatically update with it.
     val textList = remember( {mutableStateListOf<String>("a", "b")})
 
+    var openAddTripDialog by remember{mutableStateOf(false)}
+
     // Function for button; this will change the top text to "test2" and will add new text ("4").
     fun click(){
         text.value = "test2"
         textList.add("4")
     }
+
+    // Load JSON here.
+    // For now I'll just have an example trip list.
+    val triplist = listOf(
+        Trip(name = "Denver", arrivalDate = 0, departureDate = 2000),
+        Trip(name = "Aurora", arrivalDate = 0, departureDate = 2000),
+        Trip(name = "Boulder", arrivalDate = 0, departureDate = 2000)
+    )
 
     // Reloads the JSON.
     fun reloadJson(){
@@ -109,27 +133,102 @@ fun MainPreview(){
         // Don't know what scaffold means yet.
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             // Arrange elements in a column.
-            Column{
-                // See Greeting function above; adds some text saying "Hello <name>!".
-                // We use someText here so we can modify it by the button.
-                // Don't know what the modifier means yet.
-                Greeting(
-                    name = someText,
-                    modifier = Modifier.padding(innerPadding)
-                )
-                // Add a button that calls click() when you click it.
-                Button { click() }
-                // "LazyColumn" allows for a dynamically-updating column of things.
-                // I'm thinking we'll use a LazyColumn for the trip view list.
-                LazyColumn{
-                    // This will read textList and create corresponding Text UI elements.
-                    items(textList){ text ->
-                        Text(text)
-                    }
+            Column(modifier = Modifier.padding(innerPadding)){
+                // Title
+                Text("Wanderer")
+
+                // Trip list
+                tripList(triplist, ::reloadJson)
+
+                // Add trip button
+                Button(onClick = {openAddTripDialog = true}){
+                    Text("+")
                 }
+
+                if(openAddTripDialog){
+                    TripEditor({}, {})
+                }
+//                // See Greeting function above; adds some text saying "Hello <name>!".
+//                // We use someText here so we can modify it by the button.
+//                // Don't know what the modifier means yet.
+//                Greeting(
+//                    name = someText,
+//                    modifier = Modifier.padding(innerPadding)
+//                )
+//                // Add a button that calls click() when you click it.
+//                Button { click() }
+//                // "LazyColumn" allows for a dynamically-updating column of things.
+//                // I'm thinking we'll use a LazyColumn for the trip view list.
+//                LazyColumn{
+//                    // This will read textList and create corresponding Text UI elements.
+//                    items(textList){ text ->
+//                        Text(text)
+//                    }
+//                }
             }
         }
     }
+}
+
+@Composable
+fun tripButton(trip: Trip, onConfirm: () -> Unit){
+    var openEditTripMenu by remember{mutableStateOf(false)}
+
+    // Display the trip name and the trip edit button.
+    // TODO: Display dates
+    Row{
+        Button(onClick = {}){
+            Text(trip.name)
+        }
+        Button(onClick = {openEditTripMenu = true}){
+            Text("Edit")
+        }
+    }
+
+    // Dialog for editing the trip.
+    if (openEditTripMenu){
+        TripEditor(
+            onConfirm = {
+                openEditTripMenu = false
+                onConfirm()
+            },
+            onCancel = {
+                openEditTripMenu = false
+            }
+        )
+    }
+}
+
+@Preview
+@Composable
+fun tripButtonPreview(){
+    val exampleTrip = Trip(name = "Tahiti", arrivalDate = 0, departureDate = 2000)
+
+    tripButton(exampleTrip, {})
+}
+
+@Composable
+fun tripList(tripList: List<Trip>, onConfirm: () -> Unit){
+    // Put each trip into a column.
+    Column{
+        tripList.forEach{
+            // "it" is the current iterator element.
+            // Akin to ``for it in tripList:`` in Python and other languages.
+            tripButton(it, onConfirm)
+        }
+    }
+}
+
+@Preview
+@Composable
+fun tripListPreview(){
+    val exampleTripList = listOf(
+        Trip(name = "Denver", arrivalDate = 0, departureDate = 2000),
+        Trip(name = "Aurora", arrivalDate = 0, departureDate = 2000),
+        Trip(name = "Boulder", arrivalDate = 0, departureDate = 2000)
+    )
+
+    tripList(exampleTripList, {})
 }
 
 // This doesn't seem to work
