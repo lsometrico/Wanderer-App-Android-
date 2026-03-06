@@ -28,33 +28,36 @@ import com.example.wanderer.ui.theme.WandererTheme
 
 
 class MainActivity : ComponentActivity() {
-    val text = mutableStateOf("test1")
+//    val text = mutableStateOf("test1")
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val someText by text
+//        val someText by text
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            WandererTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column{
-                        Greeting(
-                            name = someText,
-                            modifier = Modifier.padding(innerPadding)
-                        )
-                        Button { click() }
-                    }
-                }
-            }
+            MainPreview()
+//            WandererTheme {
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                    Column{
+//                        Greeting(
+//                            name = someText,
+//                            modifier = Modifier.padding(innerPadding)
+//                        )
+//                        Button { click() }
+//                    }
+//                }
+//            }
         }
     }
-
-    fun click(){
-        text.value = "test2"
-    }
+//
+//    fun click(){
+//        text.value = "test2"
+//    }
 }
 
+// Fake not-real pretend JSON handling so I can make sure the trip editor logic works.
+var PRETEND_JSON_HANDLING: ArrayList<Trip> = ArrayList<Trip>()
 
 class Trip
 constructor(name: String, arrivalDate: Long, departureDate: Long)
@@ -66,16 +69,6 @@ constructor(name: String, arrivalDate: Long, departureDate: Long)
     val departureDate: Long = departureDate
 }
 
-
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
 @Composable
 fun Button(onClick: () -> Unit){
     Button(onClick){
@@ -83,13 +76,6 @@ fun Button(onClick: () -> Unit){
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    WandererTheme {
-        Greeting("Android")
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
@@ -108,23 +94,20 @@ fun MainPreview(){
         textList.add("4")
     }
 
-    // Load JSON here.
-    // For now I'll just have an example trip list.
-    val triplist = listOf(
+    // Load initial JSON here.
+    // For now, I'll just have an example trip list.
+    var triplist = ArrayList<Trip>(listOf(
         Trip(name = "Denver", arrivalDate = 0, departureDate = 2000),
         Trip(name = "Aurora", arrivalDate = 0, departureDate = 2000),
         Trip(name = "Boulder", arrivalDate = 0, departureDate = 2000)
-    )
+    ))
 
     // Reloads the JSON.
-    fun reloadJson(){
-
-    }
-
     // Called when a trip gets added.
-    // Passed to TripEditor.
-    fun tripAdded(){
-        reloadJson()
+    // TODO: Non-temporary code
+    fun reloadJson(){
+        // Temporary code until we merge real JSON handling in.
+        triplist = PRETEND_JSON_HANDLING
     }
 
     // Main display thing.
@@ -138,7 +121,7 @@ fun MainPreview(){
                 Text("Wanderer")
 
                 // Trip list
-                tripList(triplist, ::reloadJson)
+                TripList(triplist, ::reloadJson)
 
                 // Add trip button
                 Button(onClick = {openAddTripDialog = true}){
@@ -146,7 +129,7 @@ fun MainPreview(){
                 }
 
                 if(openAddTripDialog){
-                    TripEditor({}, {})
+                    TripEditor(::reloadJson, { openAddTripDialog = false })
                 }
 //                // See Greeting function above; adds some text saying "Hello <name>!".
 //                // We use someText here so we can modify it by the button.
@@ -171,7 +154,7 @@ fun MainPreview(){
 }
 
 @Composable
-fun tripButton(trip: Trip, onConfirm: () -> Unit){
+fun TripButton(trip: Trip, onConfirm: () -> Unit){
     var openEditTripMenu by remember{mutableStateOf(false)}
 
     // Display the trip name and the trip edit button.
@@ -201,34 +184,34 @@ fun tripButton(trip: Trip, onConfirm: () -> Unit){
 
 @Preview
 @Composable
-fun tripButtonPreview(){
+fun TripButtonPreview(){
     val exampleTrip = Trip(name = "Tahiti", arrivalDate = 0, departureDate = 2000)
 
-    tripButton(exampleTrip, {})
+    TripButton(exampleTrip, {})
 }
 
 @Composable
-fun tripList(tripList: List<Trip>, onConfirm: () -> Unit){
+fun TripList(tripList: List<Trip>, onConfirm: () -> Unit){
     // Put each trip into a column.
     Column{
         tripList.forEach{
             // "it" is the current iterator element.
             // Akin to ``for it in tripList:`` in Python and other languages.
-            tripButton(it, onConfirm)
+            TripButton(it, onConfirm)
         }
     }
 }
 
 @Preview
 @Composable
-fun tripListPreview(){
+fun TripListPreview(){
     val exampleTripList = listOf(
         Trip(name = "Denver", arrivalDate = 0, departureDate = 2000),
         Trip(name = "Aurora", arrivalDate = 0, departureDate = 2000),
         Trip(name = "Boulder", arrivalDate = 0, departureDate = 2000)
     )
 
-    tripList(exampleTripList, {})
+    TripList(exampleTripList, {})
 }
 
 // This doesn't seem to work

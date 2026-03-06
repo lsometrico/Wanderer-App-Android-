@@ -88,6 +88,9 @@ fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit){
     // Run when a _new_ trip is created.
     fun appendToJson(){
         // Save the data of the trip to the JSON.
+        // We use !! here to say "I am absolutely positive this is not null".
+        // This is checked in the confirm button code.
+        PRETEND_JSON_HANDLING.add(Trip(name, arrivalDate.selectedDateMillis!!, departureDate.selectedDateMillis!!))
     }
 
     Dialog (onDismissRequest = onCancel){
@@ -115,6 +118,9 @@ fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit){
             // Confirm button
             Button(onClick = {
                 // Check to ensure that name, arrival, and departure are selected.
+                // Arrival and departure check MUST be present, or
+                //   we'll have a NullException when it's asserted to be non-null in appendToJson.
+                // If we want it optional we'll need to modify the Trip class.
                 if (name == ""){
                     warningText = "Must enter a name."
                     return@Button
