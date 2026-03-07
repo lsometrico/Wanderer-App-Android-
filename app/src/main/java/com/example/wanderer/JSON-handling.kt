@@ -37,16 +37,9 @@ object JsonStorage {
         return names
     }
 
-    /**
-     * Generates a unique trip name by appending an incrementing number
-     * if the desired name is already taken.
-     *
-     * e.g. "Japan Trip" → "Japan Trip (2)" → "Japan Trip (3)"
-     *
-     * @param desiredName  The trip name the user wants to use.
-     * @param existingNames The set of trip names already in storage.
-     * @return A unique trip name safe to save.
-     */
+    //if its an existing trip name, use the same trip name 
+    //it'll just append a number to the end of it to make it unique 
+
     private fun resolveUniqueTripName(desiredName: String, existingNames: Set<String>): String {
         if (desiredName !in existingNames) return desiredName
 
