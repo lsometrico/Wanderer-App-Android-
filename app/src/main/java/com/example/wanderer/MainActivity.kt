@@ -200,6 +200,10 @@ fun TripList(tripList: List<Trip>, onConfirm: () -> Unit){
             TripButton(it, onConfirm)
         }
     }
+
+    fun click(){
+        text.value = "test2"
+    }
 }
 
 @Preview
