@@ -67,6 +67,11 @@ constructor(name: String, arrivalDate: Long, departureDate: Long)
     // Not fully sure which epoch. Should be obtained from DatePickerState.selectedDateMillis.
     val arrivalDate: Long = arrivalDate
     val departureDate: Long = departureDate
+
+    // TODO function to convert this to a JSONObject so that JSON-handling.kt can write it properly.
+    fun toJSONObject(){
+
+    }
 }
 
 @Composable
