@@ -25,6 +25,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.example.wanderer.ui.theme.WandererTheme
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 
 
 class MainActivity : ComponentActivity() {
@@ -32,6 +34,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 //        val someText by text
+
+        val intent = Intent(applicationContext, CalendarActivity::class.java)
+        startActivity(intent)
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
