@@ -118,26 +118,6 @@ fun WCalendarPreview(tripData: JSONObject){
 }
 
 
-// A NOTE ABOUT SERIALIZABLE DATA CLASSES
-// The variable names given here must *exactly* match the field names in the JSON format,
-//  because they *are* the field names. Kotlin will use them as such.
-
-// Also I'll move all these to their own file later.
-
-// Data class for Activities.
-@Serializable
-data class Activity(val name: String, val type: String, val priority: String)
-
-
-// Data class for Days.
-@Serializable
-data class Day(val morning: Activity, val midmorning: Activity, val noon: Activity, val afternoon: Activity, val evening: Activity)
-
-// Data class for Trips.
-// Temporarily named differently due to a name conflict in MainActivity. Will fix later.
-// Will need more fields later.
-@Serializable
-data class CTrip(val tripName: String, val days: Array<Day>)
 
 // NOTE : I'm using a slightly different format. Pretty much the same.
 // See example trip JSON above for details. Need to document this more formally later.

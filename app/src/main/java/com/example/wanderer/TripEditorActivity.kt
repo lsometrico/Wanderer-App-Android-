@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.example.wanderer
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -28,9 +29,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
+import com.example.wanderer.JsonStorage.saveTrip
 import com.example.wanderer.ui.theme.WandererTheme
+import kotlinx.serialization.json.Json
+import org.json.JSONObject
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
 import kotlin.math.sqrt
@@ -79,6 +86,7 @@ fun TripEditorPreview(){
 fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit){
     // Trip name.
     var name by remember<MutableState<String>>({mutableStateOf("")})
+    val context = LocalContext.current
 
     val arrivalDate = rememberDatePickerState()
     val departureDate = rememberDatePickerState()
@@ -90,7 +98,12 @@ fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit){
         // Save the data of the trip to the JSON.
         // We use !! here to say "I am absolutely positive this is not null".
         // This is checked in the confirm button code.
-        PRETEND_JSON_HANDLING.add(Trip(name, arrivalDate.selectedDateMillis!!, departureDate.selectedDateMillis!!))
+        val trip = Trip.new(
+            name,
+            arrivalDate.selectedDateMillis!!,
+            departureDate.selectedDateMillis!!
+        )
+        saveTrip(context, JSONObject(Json.encodeToString(trip)))
     }
 
     Dialog (onDismissRequest = onCancel){

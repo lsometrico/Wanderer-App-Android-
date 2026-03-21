@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.example.wanderer.ui.theme.WandererTheme
 import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
+import com.example.wanderer.JsonStorage.loadAllTrips
 
 
 class MainActivity : ComponentActivity() {
@@ -35,8 +36,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 //        val someText by text
 
-        val intent = Intent(applicationContext, CalendarActivity::class.java)
-        startActivity(intent)
+//        val intent = Intent(applicationContext, CalendarActivity::class.java)
+//        startActivity(intent)
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -64,20 +65,20 @@ class MainActivity : ComponentActivity() {
 // Fake not-real pretend JSON handling so I can make sure the trip editor logic works.
 var PRETEND_JSON_HANDLING: ArrayList<Trip> = ArrayList<Trip>()
 
-class Trip
-constructor(name: String, arrivalDate: Long, departureDate: Long)
-{
-    val name: String = name
-    // Arrival & departure are time at start of date from epoch in milliseconds.
-    // Not fully sure which epoch. Should be obtained from DatePickerState.selectedDateMillis.
-    val arrivalDate: Long = arrivalDate
-    val departureDate: Long = departureDate
-
-    // TODO function to convert this to a JSONObject so that JSON-handling.kt can write it properly.
-    fun toJSONObject(){
-
-    }
-}
+//class Trip
+//constructor(name: String, arrivalDate: Long, departureDate: Long)
+//{
+//    val name: String = name
+//    // Arrival & departure are time at start of date from epoch in milliseconds.
+//    // Not fully sure which epoch. Should be obtained from DatePickerState.selectedDateMillis.
+//    val arrivalDate: Long = arrivalDate
+//    val departureDate: Long = departureDate
+//
+//    // TODO function to convert this to a JSONObject so that JSON-handling.kt can write it properly.
+//    fun toJSONObject(){
+//
+//    }
+//}
 
 @Composable
 fun Button(onClick: () -> Unit){
@@ -107,9 +108,9 @@ fun MainPreview(){
     // Load initial JSON here.
     // For now, I'll just have an example trip list.
     var triplist = ArrayList<Trip>(listOf(
-        Trip(name = "Denver", arrivalDate = 0, departureDate = 2000),
-        Trip(name = "Aurora", arrivalDate = 0, departureDate = 2000),
-        Trip(name = "Boulder", arrivalDate = 0, departureDate = 2000)
+        Trip(tripName = "Denver", arrivalDate = 0, departureDate = 2000, days=emptyArray()),
+        Trip(tripName = "Aurora", arrivalDate = 0, departureDate = 2000, days=emptyArray()),
+        Trip(tripName = "Boulder", arrivalDate = 0, departureDate = 2000, days=emptyArray())
     ))
 
     // Reloads the JSON.
@@ -132,6 +133,8 @@ fun MainPreview(){
 
                 // Trip list
                 TripList(triplist, ::reloadJson)
+
+                Text(loadAllTrips(LocalContext.current).toString())
 
                 // Add trip button
                 Button(onClick = {openAddTripDialog = true}){
@@ -171,7 +174,7 @@ fun TripButton(trip: Trip, onConfirm: () -> Unit){
     // TODO: Display dates
     Row{
         Button(onClick = {}){
-            Text(trip.name)
+            Text(trip.tripName)
         }
         Button(onClick = {openEditTripMenu = true}){
             Text("Edit")
@@ -195,7 +198,7 @@ fun TripButton(trip: Trip, onConfirm: () -> Unit){
 @Preview
 @Composable
 fun TripButtonPreview(){
-    val exampleTrip = Trip(name = "Tahiti", arrivalDate = 0, departureDate = 2000)
+    val exampleTrip = Trip(tripName = "Tahiti", arrivalDate = 0, departureDate = 2000, days=emptyArray())
 
     TripButton(exampleTrip, {})
 }
@@ -216,9 +219,9 @@ fun TripList(tripList: List<Trip>, onConfirm: () -> Unit){
 @Composable
 fun TripListPreview(){
     val exampleTripList = listOf(
-        Trip(name = "Denver", arrivalDate = 0, departureDate = 2000),
-        Trip(name = "Aurora", arrivalDate = 0, departureDate = 2000),
-        Trip(name = "Boulder", arrivalDate = 0, departureDate = 2000)
+        Trip(tripName = "Denver", arrivalDate = 0, departureDate = 2000, days=emptyArray()),
+        Trip(tripName = "Aurora", arrivalDate = 0, departureDate = 2000, days=emptyArray()),
+        Trip(tripName = "Boulder", arrivalDate = 0, departureDate = 2000, days=emptyArray())
     )
 
     TripList(exampleTripList, {})
