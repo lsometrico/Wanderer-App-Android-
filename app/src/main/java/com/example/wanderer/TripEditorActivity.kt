@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import com.example.wanderer.JsonStorage.saveTrip
+import com.example.wanderer.JsonStorage.saveTripByName
 import com.example.wanderer.ui.theme.WandererTheme
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
@@ -103,7 +104,7 @@ fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit){
             arrivalDate.selectedDateMillis!!,
             departureDate.selectedDateMillis!!
         )
-        saveTrip(context, JSONObject(Json.encodeToString(trip)))
+        saveTripByName(context, JSONObject(Json.encodeToString(trip)))
     }
 
     Dialog (onDismissRequest = onCancel){

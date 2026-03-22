@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.example.wanderer.JsonStorage.loadAllTrips
 import com.example.wanderer.JsonStorage.loadTripByName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -74,17 +75,24 @@ class CalendarActivity : ComponentActivity() {
             ]
             }]""".trimMargin())
 
-        val tripData = allTripsData.getJSONObject(0)
+
+        // The trip MUST exist in the JSON when CalendarActivity is made or it'll crash.
+        // Get the trip data associated with the given passed-in tripName
+        val tripIntent = intent
+        val tripName = tripIntent.getStringExtra("tripName")!!
+
+        val appData = loadAllTrips(applicationContext)
+        val tripData = appData.find{trip -> trip.getString("tripName") == tripName}!!
+//        val tripData = allTripsData.getJSONObject(0)
 
 
 //        val tripData = JSONObject("[{\"tripName\":\"test\"}]")
 
         //load Intent first so setContent has proper variables to pass
-        val tripIntent = intent
 //        val tripName = tripIntent.getJSONObject("tripJSON")
 //        val tripDay = tripIntent.getInt(day=1)
         setContent {
-                WCalendarPreview (tripData)
+            WCalendarPreview (tripData)
         }
     }
     //both calendar Activity and MainActivity pass tripJSON

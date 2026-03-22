@@ -1,5 +1,6 @@
 package com.example.wanderer
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,6 +31,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Start up CalendarActivity.
 //        val intent = Intent(applicationContext, CalendarActivity::class.java)
+//        intent.putExtra("tripName", "wawa")
 //        startActivity(intent)
 
         super.onCreate(savedInstanceState)
