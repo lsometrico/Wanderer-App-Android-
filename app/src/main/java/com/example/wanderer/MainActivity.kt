@@ -4,28 +4,21 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.Button
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.example.wanderer.ui.theme.WandererTheme
-import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import com.example.wanderer.JsonStorage.loadAllTrips
 import kotlinx.serialization.json.Json
@@ -33,11 +26,9 @@ import org.json.JSONObject
 
 
 class MainActivity : ComponentActivity() {
-//    val text = mutableStateOf("test1")
-
+    // Ran on startup.
     override fun onCreate(savedInstanceState: Bundle?) {
-//        val someText by text
-
+        // Start up CalendarActivity.
 //        val intent = Intent(applicationContext, CalendarActivity::class.java)
 //        startActivity(intent)
 
@@ -45,77 +36,17 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MainPreview()
-//            WandererTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Column{
-//                        Greeting(
-//                            name = someText,
-//                            modifier = Modifier.padding(innerPadding)
-//                        )
-//                        Button { click() }
-//                    }
-//                }
-//            }
         }
     }
-//
-//    fun click(){
-//        text.value = "test2"
-//    }
 }
-
-// Fake not-real pretend JSON handling so I can make sure the trip editor logic works.
-var PRETEND_JSON_HANDLING: ArrayList<Trip> = ArrayList<Trip>()
-
-//class Trip
-//constructor(name: String, arrivalDate: Long, departureDate: Long)
-//{
-//    val name: String = name
-//    // Arrival & departure are time at start of date from epoch in milliseconds.
-//    // Not fully sure which epoch. Should be obtained from DatePickerState.selectedDateMillis.
-//    val arrivalDate: Long = arrivalDate
-//    val departureDate: Long = departureDate
-//
-//    // TODO function to convert this to a JSONObject so that JSON-handling.kt can write it properly.
-//    fun toJSONObject(){
-//
-//    }
-//}
-
-@Composable
-fun Button(onClick: () -> Unit){
-    Button(onClick){
-        Text("button")
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable
 fun MainPreview(){
-    // A text value that we can update, and associated UI elements will automatically update with it.
-    val text = remember<MutableState<String>>({mutableStateOf("test1")})
-    val someText by text
-    // A list of text that we can update, and associated UI elements will automatically update with it.
-    val textList = remember( {mutableStateListOf<String>("a", "b")})
-
+    // Controls whether the add trip dialog is open or not.
     var openAddTripDialog by remember{mutableStateOf(false)}
-
+    // The application context; needed for loadJson.
     val context = LocalContext.current
-
-    // Function for button; this will change the top text to "test2" and will add new text ("4").
-    fun click(){
-        text.value = "test2"
-        textList.add("4")
-    }
-
-    // Load initial JSON here.
-    // For now, I'll just have an example trip list.
-//    var triplist = ArrayList<Trip>(listOf(
-//        Trip(tripName = "Denver", arrivalDate = 0, departureDate = 2000, days=emptyArray()),
-//        Trip(tripName = "Aurora", arrivalDate = 0, departureDate = 2000, days=emptyArray()),
-//        Trip(tripName = "Boulder", arrivalDate = 0, departureDate = 2000, days=emptyArray())
-//    ))
 
     // Load the JSON and return it as a list of trips.
     fun loadJson(): List<Trip>{
@@ -151,6 +82,7 @@ fun MainPreview(){
                     Text("+")
                 }
 
+                // The add/edit trip dialog.
                 if(openAddTripDialog){
                     TripEditor(::reloadJson, { openAddTripDialog = false })
                 }
@@ -175,6 +107,7 @@ fun TripButton(trip: Trip, onConfirm: () -> Unit){
     }
 
     // Dialog for editing the trip.
+    // TODO: Hook up actual editing in TripEditor
     if (openEditTripMenu){
         TripEditor(
             onConfirm = {
@@ -188,6 +121,7 @@ fun TripButton(trip: Trip, onConfirm: () -> Unit){
     }
 }
 
+// A preview for TripButton.
 @Preview
 @Composable
 fun TripButtonPreview(){
@@ -196,6 +130,7 @@ fun TripButtonPreview(){
     TripButton(exampleTrip, {})
 }
 
+// Display a list of trips (as buttons), with associated edit buttons as well.
 @Composable
 fun TripList(tripList: List<Trip>, onConfirm: () -> Unit){
     // Put each trip into a column.
@@ -208,6 +143,7 @@ fun TripList(tripList: List<Trip>, onConfirm: () -> Unit){
     }
 }
 
+// A preview for TripList.
 @Preview
 @Composable
 fun TripListPreview(){
@@ -218,13 +154,4 @@ fun TripListPreview(){
     )
 
     TripList(exampleTripList, {})
-}
-
-// This doesn't seem to work
-// I'm thinking we put the bulk of the activity thing in a separate function,
-// that way we can use the same thing in the activity and preview without changes.
-@Preview(showBackground = true)
-@Composable
-fun MainPreview2(){
-    MainActivity()
 }

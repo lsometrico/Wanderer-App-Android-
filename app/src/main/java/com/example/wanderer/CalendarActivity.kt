@@ -43,6 +43,9 @@ class CalendarActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // We'll send in a tripName via an Intent,
+        // then this will load the JSON and select the appropriate trip.
+
         // temporary JSON object
         val allTripsData = JSONArray("""[{
             "tripName":"b", 
