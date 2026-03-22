@@ -104,7 +104,7 @@ fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit){
             arrivalDate.selectedDateMillis!!,
             departureDate.selectedDateMillis!!
         )
-        saveTripByName(context, JSONObject(Json.encodeToString(trip)))
+        saveTrip(context, JSONObject(Json.encodeToString(trip)))
     }
 
     Dialog (onDismissRequest = onCancel){
