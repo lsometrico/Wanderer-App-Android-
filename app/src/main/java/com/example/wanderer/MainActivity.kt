@@ -28,6 +28,8 @@ import com.example.wanderer.ui.theme.WandererTheme
 import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import com.example.wanderer.JsonStorage.loadAllTrips
+import kotlinx.serialization.json.Json
+import org.json.JSONObject
 
 
 class MainActivity : ComponentActivity() {
@@ -99,6 +101,8 @@ fun MainPreview(){
 
     var openAddTripDialog by remember{mutableStateOf(false)}
 
+    val context = LocalContext.current
+
     // Function for button; this will change the top text to "test2" and will add new text ("4").
     fun click(){
         text.value = "test2"
@@ -107,18 +111,26 @@ fun MainPreview(){
 
     // Load initial JSON here.
     // For now, I'll just have an example trip list.
-    var triplist = ArrayList<Trip>(listOf(
-        Trip(tripName = "Denver", arrivalDate = 0, departureDate = 2000, days=emptyArray()),
-        Trip(tripName = "Aurora", arrivalDate = 0, departureDate = 2000, days=emptyArray()),
-        Trip(tripName = "Boulder", arrivalDate = 0, departureDate = 2000, days=emptyArray())
-    ))
+//    var triplist = ArrayList<Trip>(listOf(
+//        Trip(tripName = "Denver", arrivalDate = 0, departureDate = 2000, days=emptyArray()),
+//        Trip(tripName = "Aurora", arrivalDate = 0, departureDate = 2000, days=emptyArray()),
+//        Trip(tripName = "Boulder", arrivalDate = 0, departureDate = 2000, days=emptyArray())
+//    ))
 
-    // Reloads the JSON.
-    // Called when a trip gets added.
-    // TODO: Non-temporary code
+    // Load the JSON and return it as a list of trips.
+    fun loadJson(): List<Trip>{
+        return loadAllTrips(context)
+            .map<JSONObject, Trip> { obj: JSONObject -> Json.decodeFromString<Trip>(obj.toString()) }
+    }
+
+    // Stores the list of trips.
+    var tripList = loadJson()
+
+    // Reloads the JSON and closes the addActivity menu.
+    // Called when a trip gets added (confirm button is pressed).
     fun reloadJson(){
-        // Temporary code until we merge real JSON handling in.
-        triplist = PRETEND_JSON_HANDLING
+        tripList = loadJson()
+        openAddTripDialog = false
     }
 
     // Main display thing.
@@ -132,9 +144,7 @@ fun MainPreview(){
                 Text("Wanderer")
 
                 // Trip list
-                TripList(triplist, ::reloadJson)
-
-                Text(loadAllTrips(LocalContext.current).toString())
+                TripList(tripList, ::reloadJson)
 
                 // Add trip button
                 Button(onClick = {openAddTripDialog = true}){
@@ -144,23 +154,6 @@ fun MainPreview(){
                 if(openAddTripDialog){
                     TripEditor(::reloadJson, { openAddTripDialog = false })
                 }
-//                // See Greeting function above; adds some text saying "Hello <name>!".
-//                // We use someText here so we can modify it by the button.
-//                // Don't know what the modifier means yet.
-//                Greeting(
-//                    name = someText,
-//                    modifier = Modifier.padding(innerPadding)
-//                )
-//                // Add a button that calls click() when you click it.
-//                Button { click() }
-//                // "LazyColumn" allows for a dynamically-updating column of things.
-//                // I'm thinking we'll use a LazyColumn for the trip view list.
-//                LazyColumn{
-//                    // This will read textList and create corresponding Text UI elements.
-//                    items(textList){ text ->
-//                        Text(text)
-//                    }
-//                }
             }
         }
     }
