@@ -63,6 +63,10 @@ fun MainPreview(){
     // Called when a trip gets added (confirm button is pressed).
     fun reloadJson(){
         tripList = loadJson()
+        // Bizarrely, it doesn't seem to recompose properly on trip edit unless I assign to this a couple times.
+        // Very weird hack.
+        openAddTripDialog = false
+        openAddTripDialog = true
         openAddTripDialog = false
     }
 
@@ -118,7 +122,8 @@ fun TripButton(trip: Trip, onConfirm: () -> Unit){
             },
             onCancel = {
                 openEditTripMenu = false
-            }
+            },
+            trip = trip
         )
     }
 }

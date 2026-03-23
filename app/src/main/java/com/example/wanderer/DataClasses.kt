@@ -49,7 +49,7 @@ data class Day(val morning: Activity, val midmorning: Activity, val noon: Activi
 // Temporarily named differently due to a name conflict in MainActivity. Will fix later.
 // Will need more fields later.
 @Serializable
-data class Trip(val tripName: String, val days: Array<Day>, val arrivalDate: Long, val departureDate: Long){
+data class Trip(var tripName: String, var days: Array<Day>, var arrivalDate: Long, var departureDate: Long){
     companion object{
         // Create a new Trip.
         // Parameters:

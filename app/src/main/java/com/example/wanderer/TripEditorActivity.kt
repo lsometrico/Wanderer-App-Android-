@@ -32,6 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
+import com.example.wanderer.JsonStorage.deleteTrip
+import com.example.wanderer.JsonStorage.loadAllTrips
+import com.example.wanderer.JsonStorage.loadTripByName
 import com.example.wanderer.JsonStorage.saveTrip
 import com.example.wanderer.JsonStorage.saveTripByName
 import com.example.wanderer.ui.theme.WandererTheme
@@ -80,32 +83,59 @@ fun TripEditorPreview(){
 }
 
 // An entire trip editor.
-// The finalize function should receive a name, arrival date, and departure date,
-//   write the new data to JSON, and return an exit code of 1.
-// The cancel function should do nothing except return an exit code of 0.
+// The onConfirm function should reload the JSON and cause a recompose, and close this menu.
+// The onCancel functinon should just close this menu.
 @Composable
-fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit){
+fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip? = null){
     // Trip name.
-    var name by remember<MutableState<String>>({mutableStateOf("")})
+    // If the passed trip is non-null, we use its name as initial value;
+    // otherwise we init to empty string.
+    var name by remember<MutableState<String>>{
+        if(trip != null){
+            mutableStateOf(trip.tripName)
+        }else{
+            mutableStateOf("")
+        }
+    }
+
+    // Context, needed for appendToJson function.
+    // Can't directly access LocalContext.current inside the function because it's not composable.
     val context = LocalContext.current
 
-    val arrivalDate = rememberDatePickerState()
-    val departureDate = rememberDatePickerState()
+    // Arrival date & departure date.
+    // If the passed trip is non-null, we use its dates as initial values;
+    // otherwise we pass null in so it initializes as default.
+    val arrivalDate = rememberDatePickerState(trip?.arrivalDate)
+    val departureDate = rememberDatePickerState(trip?.departureDate)
 
+    // Warning text in case the user messes up input (forgets to select date, empty name,
+    // issues of causality by trying to leave before they've arrived, etc.).
     var warningText by remember{mutableStateOf("")}
 
     // Run when a _new_ trip is created.
     fun appendToJson(){
-        // Save the data of the trip to the JSON.
-        // We use !! here to say "I am absolutely positive this is not null".
-        // This is checked in the confirm button code.
-        val trip = Trip.new(
-            name,
-            arrivalDate.selectedDateMillis!!,
-            departureDate.selectedDateMillis!!
-        )
-        saveTrip(context, JSONObject(Json.encodeToString(trip)))
-    }
+        // Save the trip to JSON.
+        // If a trip was passed, we're editing an existing one.
+        // Otherwise, we're making a new one.
+        if(trip != null){
+            // Replace the old trip with the new one.
+            // Here, we use deleteTrip to delete the old data, in case the user changed the trip name in the edit.
+            deleteTrip(context, trip.tripName)
+            // Reassign fields, then save modified data
+            trip.tripName = name;
+            trip.arrivalDate = arrivalDate.selectedDateMillis!!
+            trip.departureDate = arrivalDate.selectedDateMillis!!
+            saveTrip(context, JSONObject(Json.encodeToString(trip)))
+        }else{
+            // Create a new trip and save it.
+            val trip = Trip.new(
+                name,
+                arrivalDate.selectedDateMillis!!,
+                departureDate.selectedDateMillis!!
+            )
+            saveTrip(context, JSONObject(Json.encodeToString(trip)))
+        }
+    } // end appendToJson
 
     Dialog (onDismissRequest = onCancel){
         Column {
@@ -134,7 +164,8 @@ fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit){
                 // Check to ensure that name, arrival, and departure are selected.
                 // Arrival and departure check MUST be present, or
                 //   we'll have a NullException when it's asserted to be non-null in appendToJson.
-                // If we want it optional we'll need to modify the Trip class.
+                // Also check that departureDate is >= arrivalDate.
+                // I'm allowing them being equal so that trips of length 1 are OK.
                 if (name == ""){
                     warningText = "Must enter a name."
                     return@Button
@@ -145,6 +176,10 @@ fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit){
                 }
                 if (departureDate.selectedDateMillis == null){
                     warningText = "Must select a departure date."
+                    return@Button
+                }
+                if (departureDate.selectedDateMillis!! < arrivalDate.selectedDateMillis!!){
+                    warningText = "Departure date must be later than arrival date."
                     return@Button
                 }
 
