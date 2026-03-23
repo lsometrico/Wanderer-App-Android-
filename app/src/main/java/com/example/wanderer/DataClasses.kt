@@ -15,13 +15,13 @@ import java.time.temporal.ChronoUnit
 
 // Data class for Activities.
 @Serializable
-data class Activity(val name: String, val type: String, val priority: String) {
+data class Activity(val name: String, val type: String, val priority: Int, val address: String) {
 
     companion object {
         // Create a default Activity object.
         // Name, type, and priority are all initialized to empty strings.
         fun default(): Activity {
-            return Activity("", "", "")
+            return Activity("", "", -1, "")
         }
 
     }

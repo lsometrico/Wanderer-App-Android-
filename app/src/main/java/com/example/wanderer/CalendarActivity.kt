@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -57,40 +58,45 @@ class CalendarActivity : ComponentActivity() {
             "arrivalDate": 0,
             "departureDate": 1,
             days = [
-                {"morning":
+                {
+                "morning":
                     {"name":"Koi Ponds",
                     "type":"Activity",
-                    "priority":"3"},
+                    "priority":0,
+                    "address":""},
                 "midmorning":
                     {"name":"",
                     "type":"",
-                    "priority":""},
+                    "priority":0,
+                    "address":""},
                 "noon":
                     {"name":"",
                     "type":"",
-                    "priority":""},
+                    "priority":0,
+                    "address":""},
                 "afternoon":
                     {"name":"",
                     "type":"",
-                    "priority":""},
+                    "priority":0,
+                    "address":""},
                 "evening":
                     {"name":"",
                     "type":"",
-                    "priority":""}
+                    "priority":0,
+                    "address":""}
                 }
             ]
             }]""".trimMargin())
-        val tripData = allTripsData.getJSONObject(0)
+//        val tripData = allTripsData.getJSONObject(0)
 
 
         // The trip MUST exist in the JSON when CalendarActivity is made or it'll crash.
         // Get the trip data associated with the given passed-in tripName
-//        val tripIntent = intent
-//        val tripName = tripIntent.getStringExtra("tripName")!!
-//
-//        val appData = loadAllTrips(applicationContext)
-//        val tripData = appData.find{trip -> trip.getString("tripName") == tripName}!!
-//        val tripData = allTripsData.getJSONObject(0)
+        val tripIntent = intent
+        val tripName = tripIntent.getStringExtra("tripName")!!
+
+        val appData = loadAllTrips(applicationContext)
+        val tripData = appData.find{trip -> trip.getString("tripName") == tripName}!!
 
 
 //        val tripData = JSONObject("[{\"tripName\":\"test\"}]")
@@ -203,7 +209,24 @@ fun WCalendar (tripData: JSONObject) {
     var trip by remember{mutableStateOf(Json.decodeFromString<Trip>(tripData.toString()))}
 
     var forceRecompose by remember{mutableStateOf(true)}
+    var showAddActivityMenu by remember{mutableStateOf(false)}
 
+    val context = LocalContext.current
+
+    // Reloads the JSON.
+    fun reloadJson(){
+        // Reload JSON; get trip name, then read JSON & deserialize trip.
+        val tripName = trip.tripName
+        val tripData = loadTripByName(context, tripName)
+        trip = Json.decodeFromString<Trip>(tripData.toString())
+    }
+
+    // Reloads the JSON and closes the menu.
+    fun confirmAddEditActivity(){
+        reloadJson()
+        // Close activity menu
+        showAddActivityMenu = false
+    }
 
     // Function to swap activities. Not done yet since I realized you can't edit JSON objects directly.
     fun swapActivity(time1: String, time2: String){
@@ -276,38 +299,58 @@ fun WCalendar (tripData: JSONObject) {
 
                 Text("Morning")
                 // display morning activity
-                DisplayActivity(activity = trip.days[0].morning,
+                DisplayActivity(activity = trip.days[day].morning,
+                                trip = trip,
+                                day = day,
+                                timeSlot = "morning",
+                                onEditConfirm = ::reloadJson,
                                 swapUp = null,
                                 swapDown = {swapActivity("morning", "midmorning")})
 
                 Text("Midmorning")
                 // display midmorning activity
-                DisplayActivity(trip.days[0].midmorning,
+                DisplayActivity(trip.days[day].midmorning,
+                                trip = trip,
+                                day = day,
+                                timeSlot = "midmorning",
+                                onEditConfirm = ::reloadJson,
                                 swapUp = {swapActivity("morning", "midmorning")},
                                 swapDown = {swapActivity("midmorning", "noon")})
 
                 Text("Noon")
                 // display noon activity
-                DisplayActivity(trip.days[0].noon,
+                DisplayActivity(trip.days[day].noon,
+                                trip = trip,
+                                day = day,
+                                timeSlot = "noon",
+                                onEditConfirm = ::reloadJson,
                                 swapUp = {swapActivity("midmorning", "noon")},
                                 swapDown = {swapActivity("noon", "afternoon")})
 
                 Text("Afternoon")
                 // display afternoon activity
-                DisplayActivity(trip.days[0].afternoon,
+                DisplayActivity(trip.days[day].afternoon,
+                                trip = trip,
+                                day = day,
+                                timeSlot = "afternoon",
+                                onEditConfirm = ::reloadJson,
                                 swapUp = {swapActivity("noon", "afternoon")},
                                 swapDown = {swapActivity("afternoon", "evening")})
 
                 Text("Evening")
                 // display evening activity
-                DisplayActivity(trip.days[0].evening,
+                DisplayActivity(trip.days[day].evening,
+                                trip = trip,
+                                day = day,
+                                timeSlot = "evening",
+                                onEditConfirm = ::reloadJson,
                                 swapUp = {swapActivity("afternoon", "evening")},
                                 swapDown = null)
 
                 // Controls at the bottom.
                 Row{
                     // New activity button
-                    Button(onClick = {}){
+                    Button(onClick = {showAddActivityMenu = true}){
                         Text("New Activity")
                     }
                     // Only display the prev day button if there's days prior.
@@ -330,6 +373,11 @@ fun WCalendar (tripData: JSONObject) {
                 }else{
                 }
 
+
+                if(showAddActivityMenu){
+                    ActivityEditor(onConfirm = ::confirmAddEditActivity,
+                                    onCancel = {showAddActivityMenu = false}, trip, day)
+                }
             }
         }
     }
@@ -344,8 +392,14 @@ fun WCalendar (tripData: JSONObject) {
 // swapDown: Same as above but for the down button.
 @Composable
 fun DisplayActivity(activity: Activity,
+                    trip: Trip,
+                    day: Int,
+                    timeSlot: String,
+                    onEditConfirm: (()->Unit),
                     swapUp: (() -> Unit)? = null,
                     swapDown: (() -> Unit)? = null) {
+    var editActivityOpen by remember{mutableStateOf(false)}
+
     Row{
         // Display information about the activity; name, type, priority
         Column{
@@ -370,9 +424,17 @@ fun DisplayActivity(activity: Activity,
         }
 
         // Button to edit the activity.
-        // TODO make this real
-        Button(onClick = {}){
+        Button(onClick = {editActivityOpen = true}){
             Text("Edit")
+        }
+
+        if(editActivityOpen){
+            ActivityEditor( onConfirm = {onEditConfirm(); editActivityOpen = false},
+                            onCancel = {editActivityOpen = false},
+                            trip = trip,
+                            day = day,
+                            activity = activity,
+                            timeslot = timeSlot)
         }
     }
 }
