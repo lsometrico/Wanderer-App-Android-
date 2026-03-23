@@ -360,12 +360,12 @@ fun DisplayActivity(activity: Activity,
         // Buttons for swapping up and down; only appears if you *can* swap up and down.
         if (swapUp != null){
             Button(onClick = swapUp){
-                Text("Up")
+                Text("↑")
             }
         }
         if (swapDown != null) {
             Button(onClick = swapDown) {
-                Text("Down")
+                Text("↓")
             }
         }
 
