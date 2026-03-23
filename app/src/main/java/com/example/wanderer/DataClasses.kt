@@ -29,7 +29,7 @@ data class Activity(val name: String, val type: String, val priority: String) {
 
 // Data class for Days.
 @Serializable
-data class Day(val morning: Activity, val midmorning: Activity, val noon: Activity, val afternoon: Activity, val evening: Activity){
+data class Day(var morning: Activity, var midmorning: Activity, var noon: Activity, var afternoon: Activity, var evening: Activity){
     companion object{
         // Create a default Day object.
         // All fields are initialized to default Activities.

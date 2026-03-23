@@ -30,9 +30,9 @@ class MainActivity : ComponentActivity() {
     // Ran on startup.
     override fun onCreate(savedInstanceState: Bundle?) {
         // Start up CalendarActivity.
-//        val intent = Intent(applicationContext, CalendarActivity::class.java)
-//        intent.putExtra("tripName", "wawa")
-//        startActivity(intent)
+        val intent = Intent(applicationContext, CalendarActivity::class.java)
+        intent.putExtra("tripName", "iwi")
+        startActivity(intent)
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -104,6 +104,7 @@ fun TripButton(trip: Trip, onConfirm: () -> Unit){
     // Display the trip name and the trip edit button.
     // TODO: Display dates
     Row{
+        // TODO: When clicked, open CalendarActivity
         Button(onClick = {}){
             Text(trip.tripName)
         }

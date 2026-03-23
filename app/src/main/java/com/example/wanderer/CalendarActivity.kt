@@ -12,8 +12,11 @@ import java.util.*
 //import .JSON-handling.kt
 import android.content.Intent
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -24,6 +27,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.example.wanderer.JsonStorage.loadAllTrips
@@ -50,6 +54,8 @@ class CalendarActivity : ComponentActivity() {
         // temporary JSON object
         val allTripsData = JSONArray("""[{
             "tripName":"b", 
+            "arrivalDate": 0,
+            "departureDate": 1,
             days = [
                 {"morning":
                     {"name":"Koi Ponds",
@@ -74,15 +80,16 @@ class CalendarActivity : ComponentActivity() {
                 }
             ]
             }]""".trimMargin())
+        val tripData = allTripsData.getJSONObject(0)
 
 
         // The trip MUST exist in the JSON when CalendarActivity is made or it'll crash.
         // Get the trip data associated with the given passed-in tripName
-        val tripIntent = intent
-        val tripName = tripIntent.getStringExtra("tripName")!!
-
-        val appData = loadAllTrips(applicationContext)
-        val tripData = appData.find{trip -> trip.getString("tripName") == tripName}!!
+//        val tripIntent = intent
+//        val tripName = tripIntent.getStringExtra("tripName")!!
+//
+//        val appData = loadAllTrips(applicationContext)
+//        val tripData = appData.find{trip -> trip.getString("tripName") == tripName}!!
 //        val tripData = allTripsData.getJSONObject(0)
 
 
@@ -189,57 +196,113 @@ fun WCalendar (tripData: JSONObject) {
 
     // Test to decode JSON into classes.
     // Next I want to convert the whole trip JSON to a Trip object in a Remember block so it can be easily edited.
-    val serializedDay = Json.decodeFromString<Day>(tripData
-                .getJSONArray("days")
-                .getJSONObject(0)
-                .toString())
+//    val serializedDay = Json.decodeFromString<Day>(tripData
+//                .getJSONArray("days")
+//                .getJSONObject(0)
+//                .toString())
+    var trip by remember{mutableStateOf(Json.decodeFromString<Trip>(tripData.toString()))}
+
+    var forceRecompose by remember{mutableStateOf(true)}
 
 
-    // TODO fix this
     // Function to swap activities. Not done yet since I realized you can't edit JSON objects directly.
     fun swapActivity(time1: String, time2: String){
-        var day = tripData.getJSONArray("days").getJSONObject(0)
+        // Takes in a time, and returns the corresponding activity of the relevant day of trip.
+        fun timeToActivity(time: String): Activity{
+            return when (time) {
+                "morning" -> {
+                    trip.days[day].morning
+                }
+                "midmorning" -> {
+                    trip.days[day].midmorning
+                }
+                "noon" -> {
+                    trip.days[day].noon
+                }
+                "afternoon" -> {
+                    trip.days[day].afternoon
+                }
+                else -> /* time1 == "evening"*/ {
+                    trip.days[day].evening
+                }
+            }
+        }
 
-        val temp = day.getJSONObject(time1)
-    }
+        // Takes in an activity and a time, and sets the corresponding field of the relevant day of trip.
+        fun setActivityFromTime(activity: Activity, time: String){
+            when (time) {
+                "morning" -> {
+                    trip.days[day].morning = activity
+                }
+                "midmorning" -> {
+                    trip.days[day].midmorning = activity
+                }
+                "noon" -> {
+                    trip.days[day].noon = activity
+                }
+                "afternoon" -> {
+                    trip.days[day].afternoon = activity
+                }
+                else -> /* time1 == "evening"*/ {
+                    trip.days[day].evening = activity
+                }
+            }
+        }
+
+        // Standard swap but using the above functions.
+
+        // Assign activity 1 to temp.
+        val temp = timeToActivity(time1)
+
+        // Assign activity 2 to activity 1.
+        setActivityFromTime(timeToActivity(time2), time1)
+
+        // Assign temp to activity 2.
+        setActivityFromTime(temp, time2)
+
+
+        // Hack to force a recompose
+        forceRecompose = true;
+        forceRecompose = false;
+    } // end swapActivity
 
     WandererTheme{
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
                 // Will display date later.
-                Text("Day n")
+                Text("Day $day")
 
                 // List of time slots.
 
                 Text("Morning")
                 // display morning activity
-                DisplayActivity(tripData.getJSONArray("days")
-                                .getJSONObject(0)
-                                .getJSONObject("morning"))
+                DisplayActivity(activity = trip.days[0].morning,
+                                swapUp = null,
+                                swapDown = {swapActivity("morning", "midmorning")})
 
                 Text("Midmorning")
                 // display midmorning activity
-                DisplayActivity(tripData.getJSONArray("days")
-                    .getJSONObject(0)
-                    .getJSONObject("midmorning"))
+                DisplayActivity(trip.days[0].midmorning,
+                                swapUp = {swapActivity("morning", "midmorning")},
+                                swapDown = {swapActivity("midmorning", "noon")})
 
                 Text("Noon")
                 // display noon activity
-                DisplayActivity(tripData.getJSONArray("days")
-                    .getJSONObject(0)
-                    .getJSONObject("noon"))
+                DisplayActivity(trip.days[0].noon,
+                                swapUp = {swapActivity("midmorning", "noon")},
+                                swapDown = {swapActivity("noon", "afternoon")})
 
                 Text("Afternoon")
                 // display afternoon activity
-                DisplayActivity(tripData.getJSONArray("days")
-                    .getJSONObject(0)
-                    .getJSONObject("afternoon"))
+                DisplayActivity(trip.days[0].afternoon,
+                                swapUp = {swapActivity("noon", "afternoon")},
+                                swapDown = {swapActivity("afternoon", "evening")})
 
                 Text("Evening")
                 // display evening activity
-                DisplayActivity(tripData.getJSONArray("days")
-                    .getJSONObject(0)
-                    .getJSONObject("evening"))
+                DisplayActivity(trip.days[0].evening,
+                                swapUp = {swapActivity("afternoon", "evening")},
+                                swapDown = null)
 
                 // Controls at the bottom.
                 Row{
@@ -261,6 +324,12 @@ fun WCalendar (tripData: JSONObject) {
                     }
                 }
 
+                // Needed to do the hacky force recompose thing.
+                // If it's not here then it just seems to ignore writes to forceRecompose.
+                if(forceRecompose){
+                }else{
+                }
+
             }
         }
     }
@@ -271,21 +340,37 @@ fun WCalendar (tripData: JSONObject) {
 // Displays name stacked with type and priority, and up/down/edit buttons to the right of that.
 // Parameters:
 // activity: The JSON for the activity.
+// swapUp: The function to call if the "up" button is pressed, or null; if null the Up button won't display.
+// swapDown: Same as above but for the down button.
 @Composable
-fun DisplayActivity(activity: JSONObject){
+fun DisplayActivity(activity: Activity,
+                    swapUp: (() -> Unit)? = null,
+                    swapDown: (() -> Unit)? = null) {
     Row{
+        // Display information about the activity; name, type, priority
         Column{
-            Text(activity.getString("name"))
-            Text("type: " + activity.getString("type")
-                + ", Priority " + activity.getString("priority")
-            )
+            Text(activity.name)
+            Text("type: " + activity.type + ", Priority: " + activity.priority)
         }
-        Button(onClick = {}){
-            Text("Up")
+
+        // Spacer so that the stuff before is left aligned and the stuff after is right aligned.
+        // I'm not sure how to have a spacer the size of the Down button so the up buttons are all aligned.
+        Spacer(Modifier.weight(1f))
+
+        // Buttons for swapping up and down; only appears if you *can* swap up and down.
+        if (swapUp != null){
+            Button(onClick = swapUp){
+                Text("Up")
+            }
         }
-        Button(onClick = {}){
-            Text("Down")
+        if (swapDown != null) {
+            Button(onClick = swapDown) {
+                Text("Down")
+            }
         }
+
+        // Button to edit the activity.
+        // TODO make this real
         Button(onClick = {}){
             Text("Edit")
         }
