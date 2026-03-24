@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.example.wanderer.JsonStorage.loadAllTrips
 import com.example.wanderer.JsonStorage.loadTripByName
+import com.example.wanderer.JsonStorage.saveTripByName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
@@ -290,6 +291,9 @@ fun WCalendar (tripData: JSONObject, exit: () -> Unit) {
         // Assign temp to activity 2.
         setActivityFromTime(temp, time2)
 
+
+        // Save the JSON.
+        saveTripByName(context, JSONObject(Json.encodeToString(trip)))
 
         // Hack to force a recompose
         forceRecompose = true;
