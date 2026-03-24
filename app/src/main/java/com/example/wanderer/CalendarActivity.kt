@@ -105,8 +105,12 @@ class CalendarActivity : ComponentActivity() {
 //        val tripName = tripIntent.getJSONObject("tripJSON")
 //        val tripDay = tripIntent.getInt(day=1)
         setContent {
-            WCalendarPreview (tripData)
+            WCalendar (tripData, ::exit)
         }
+    }
+
+    fun exit(){
+        this.finish()
     }
     //both calendar Activity and MainActivity pass tripJSON
     //only calendar Activity passes day:Int. default is set as one
@@ -135,9 +139,12 @@ class CalendarActivity : ComponentActivity() {
 
 @Composable
 fun WCalendarPreview(tripData: JSONObject){
-    //if anyone wants to try to make our JSON in Kotlin, knock yourself out. ¯\_ (ツ)_/¯ 
+    //if anyone wants to try to make our JSON in Kotlin, knock yourself out. ¯\_ (ツ)_/¯
+
+    fun fakeExit(){}
+
     WandererTheme {
-        WCalendar(tripData)
+        WCalendar(tripData, exit = ::fakeExit)
     }
 }
 
@@ -179,7 +186,7 @@ fun WCalendarPreview(tripData: JSONObject){
 
 //WCalendar main function, called with JSON data for a single day.
 @Composable
-fun WCalendar (tripData: JSONObject) {
+fun WCalendar (tripData: JSONObject, exit: () -> Unit) {
 
     // Stores current day.
     var day by remember{ mutableIntStateOf(0) }
@@ -292,7 +299,8 @@ fun WCalendar (tripData: JSONObject) {
     WandererTheme{
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-                // Will display date later.
+                // Display trip name and date.
+                Text(trip.tripName)
                 Text("Day $day")
 
                 // List of time slots.
@@ -367,6 +375,11 @@ fun WCalendar (tripData: JSONObject) {
                     }
                 }
 
+                // Button to exit.
+                Button(onClick = exit){
+                    Text("Exit")
+                }
+
                 // Needed to do the hacky force recompose thing.
                 // If it's not here then it just seems to ignore writes to forceRecompose.
                 if(forceRecompose){
@@ -378,10 +391,10 @@ fun WCalendar (tripData: JSONObject) {
                     ActivityEditor(onConfirm = ::confirmAddEditActivity,
                                     onCancel = {showAddActivityMenu = false}, trip, day)
                 }
-            }
-        }
-    }
-}
+            } // end Column
+        } // end Scaffold
+    } // end WandererTheme
+} // end WCalendar
 
 
 // Displays one activity.

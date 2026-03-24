@@ -30,9 +30,9 @@ class MainActivity : ComponentActivity() {
     // Ran on startup.
     override fun onCreate(savedInstanceState: Bundle?) {
         // Start up CalendarActivity.
-        val intent = Intent(applicationContext, CalendarActivity::class.java)
-        intent.putExtra("tripName", "iwi")
-        startActivity(intent)
+//        val intent = Intent(applicationContext, CalendarActivity::class.java)
+//        intent.putExtra("tripName", "iwi")
+//        startActivity(intent)
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -100,12 +100,17 @@ fun MainPreview(){
 @Composable
 fun TripButton(trip: Trip, onConfirm: () -> Unit){
     var openEditTripMenu by remember{mutableStateOf(false)}
-
+    val context = LocalContext.current
     // Display the trip name and the trip edit button.
     // TODO: Display dates
     Row{
-        // TODO: When clicked, open CalendarActivity
-        Button(onClick = {}){
+        // Trip name button.
+        // When clicked, it opens its associated CalendarActivity.
+        Button(onClick = {
+            val intent = Intent(context, CalendarActivity::class.java)
+            intent.putExtra("tripName", trip.tripName)
+            context.startActivity(intent)
+        }){
             Text(trip.tripName)
         }
         Button(onClick = {openEditTripMenu = true}){
