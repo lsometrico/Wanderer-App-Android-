@@ -213,7 +213,7 @@ fun DatePopupPicker(datePickerState: DatePickerState, name: String){
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    val selectedDate = datePickerState.selectedDateMillis
+//                    val selectedDate = datePickerState.selectedDateMillis
                     showDatePicker = false
                 }) {
                     Text("OK")

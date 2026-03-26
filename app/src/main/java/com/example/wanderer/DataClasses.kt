@@ -15,13 +15,13 @@ import java.time.temporal.ChronoUnit
 
 // Data class for Activities.
 @Serializable
-data class Activity(val name: String, val type: String, val priority: Int, val address: String) {
+data class Activity(val name: String, val type: String, val priority: Int, val address: String, val hour: Int, val minute: Int) {
 
     companion object {
         // Create a default Activity object.
         // Name, type, and priority are all initialized to empty strings.
         fun default(): Activity {
-            return Activity("", "", -1, "")
+            return Activity("", "", -1, "", hour = 0, minute = 0)
         }
 
     }
@@ -29,18 +29,17 @@ data class Activity(val name: String, val type: String, val priority: Int, val a
 
 // Data class for Days.
 @Serializable
-data class Day(var morning: Activity, var midmorning: Activity, var noon: Activity, var afternoon: Activity, var evening: Activity){
+data class Day(var activities: MutableList<Activity>){
+    fun insertActivity(activity: Activity){
+        activities.add(activity)
+    }
     companion object{
         // Create a default Day object.
         // All fields are initialized to default Activities.
         fun default(): Day{
-            return Day(
-                morning = Activity.default(),
-                midmorning = Activity.default(),
-                noon = Activity.default(),
-                afternoon = Activity.default(),
-                evening = Activity.default()
-            )
+            // TODO empty array; this is here for compat while I'm working on it
+            return Day(activities = mutableListOf())
+//            return Day(activities = mutableListOf(Activity.default(), Activity.default(), Activity.default(), Activity.default(), Activity.default()))
         }
     }
 }

@@ -238,66 +238,66 @@ fun WCalendar (tripData: JSONObject, exit: () -> Unit) {
 
     // Function to swap activities. Not done yet since I realized you can't edit JSON objects directly.
     fun swapActivity(time1: String, time2: String){
-        // Takes in a time, and returns the corresponding activity of the relevant day of trip.
-        fun timeToActivity(time: String): Activity{
-            return when (time) {
-                "morning" -> {
-                    trip.days[day].morning
-                }
-                "midmorning" -> {
-                    trip.days[day].midmorning
-                }
-                "noon" -> {
-                    trip.days[day].noon
-                }
-                "afternoon" -> {
-                    trip.days[day].afternoon
-                }
-                else -> /* time1 == "evening"*/ {
-                    trip.days[day].evening
-                }
-            }
-        }
-
-        // Takes in an activity and a time, and sets the corresponding field of the relevant day of trip.
-        fun setActivityFromTime(activity: Activity, time: String){
-            when (time) {
-                "morning" -> {
-                    trip.days[day].morning = activity
-                }
-                "midmorning" -> {
-                    trip.days[day].midmorning = activity
-                }
-                "noon" -> {
-                    trip.days[day].noon = activity
-                }
-                "afternoon" -> {
-                    trip.days[day].afternoon = activity
-                }
-                else -> /* time1 == "evening"*/ {
-                    trip.days[day].evening = activity
-                }
-            }
-        }
-
-        // Standard swap but using the above functions.
-
-        // Assign activity 1 to temp.
-        val temp = timeToActivity(time1)
-
-        // Assign activity 2 to activity 1.
-        setActivityFromTime(timeToActivity(time2), time1)
-
-        // Assign temp to activity 2.
-        setActivityFromTime(temp, time2)
-
-
-        // Save the JSON.
-        saveTripByName(context, JSONObject(Json.encodeToString(trip)))
-
-        // Hack to force a recompose
-        forceRecompose = true;
-        forceRecompose = false;
+//        // Takes in a time, and returns the corresponding activity of the relevant day of trip.
+//        fun timeToActivity(time: String): Activity{
+//            return when (time) {
+//                "morning" -> {
+//                    trip.days[day].morning
+//                }
+//                "midmorning" -> {
+//                    trip.days[day].midmorning
+//                }
+//                "noon" -> {
+//                    trip.days[day].noon
+//                }
+//                "afternoon" -> {
+//                    trip.days[day].afternoon
+//                }
+//                else -> /* time1 == "evening"*/ {
+//                    trip.days[day].evening
+//                }
+//            }
+//        }
+//
+//        // Takes in an activity and a time, and sets the corresponding field of the relevant day of trip.
+//        fun setActivityFromTime(activity: Activity, time: String){
+//            when (time) {
+//                "morning" -> {
+//                    trip.days[day].morning = activity
+//                }
+//                "midmorning" -> {
+//                    trip.days[day].midmorning = activity
+//                }
+//                "noon" -> {
+//                    trip.days[day].noon = activity
+//                }
+//                "afternoon" -> {
+//                    trip.days[day].afternoon = activity
+//                }
+//                else -> /* time1 == "evening"*/ {
+//                    trip.days[day].evening = activity
+//                }
+//            }
+//        }
+//
+//        // Standard swap but using the above functions.
+//
+//        // Assign activity 1 to temp.
+//        val temp = timeToActivity(time1)
+//
+//        // Assign activity 2 to activity 1.
+//        setActivityFromTime(timeToActivity(time2), time1)
+//
+//        // Assign temp to activity 2.
+//        setActivityFromTime(temp, time2)
+//
+//
+//        // Save the JSON.
+//        saveTripByName(context, JSONObject(Json.encodeToString(trip)))
+//
+//        // Hack to force a recompose
+//        forceRecompose = true;
+//        forceRecompose = false;
     } // end swapActivity
 
     WandererTheme{
@@ -308,56 +308,56 @@ fun WCalendar (tripData: JSONObject, exit: () -> Unit) {
                 Text("Day $day")
 
                 // List of time slots.
-
-                Text("Morning")
-                // display morning activity
-                DisplayActivity(activity = trip.days[day].morning,
-                                trip = trip,
-                                day = day,
-                                timeSlot = "morning",
-                                onEditConfirm = ::reloadJson,
-                                swapUp = null,
-                                swapDown = {swapActivity("morning", "midmorning")})
-
-                Text("Midmorning")
-                // display midmorning activity
-                DisplayActivity(trip.days[day].midmorning,
-                                trip = trip,
-                                day = day,
-                                timeSlot = "midmorning",
-                                onEditConfirm = ::reloadJson,
-                                swapUp = {swapActivity("morning", "midmorning")},
-                                swapDown = {swapActivity("midmorning", "noon")})
-
-                Text("Noon")
-                // display noon activity
-                DisplayActivity(trip.days[day].noon,
-                                trip = trip,
-                                day = day,
-                                timeSlot = "noon",
-                                onEditConfirm = ::reloadJson,
-                                swapUp = {swapActivity("midmorning", "noon")},
-                                swapDown = {swapActivity("noon", "afternoon")})
-
-                Text("Afternoon")
-                // display afternoon activity
-                DisplayActivity(trip.days[day].afternoon,
-                                trip = trip,
-                                day = day,
-                                timeSlot = "afternoon",
-                                onEditConfirm = ::reloadJson,
-                                swapUp = {swapActivity("noon", "afternoon")},
-                                swapDown = {swapActivity("afternoon", "evening")})
-
-                Text("Evening")
-                // display evening activity
-                DisplayActivity(trip.days[day].evening,
-                                trip = trip,
-                                day = day,
-                                timeSlot = "evening",
-                                onEditConfirm = ::reloadJson,
-                                swapUp = {swapActivity("afternoon", "evening")},
-                                swapDown = null)
+                ActivityList(trip, 0, ::reloadJson)
+//                Text("Morning")
+//                // display morning activity
+//                DisplayActivity(activity = trip.days[day].activities[0],
+//                                trip = trip,
+//                                day = day,
+//                                timeSlot = "morning",
+//                                onEditConfirm = ::reloadJson,
+//                                swapUp = null,
+//                                swapDown = {swapActivity("morning", "midmorning")})
+//
+//                Text("Midmorning")
+//                // display midmorning activity
+//                DisplayActivity(trip.days[day].activities[1],
+//                                trip = trip,
+//                                day = day,
+//                                timeSlot = "midmorning",
+//                                onEditConfirm = ::reloadJson,
+//                                swapUp = {swapActivity("morning", "midmorning")},
+//                                swapDown = {swapActivity("midmorning", "noon")})
+//
+//                Text("Noon")
+//                // display noon activity
+//                DisplayActivity(trip.days[day].activities[2],
+//                                trip = trip,
+//                                day = day,
+//                                timeSlot = "noon",
+//                                onEditConfirm = ::reloadJson,
+//                                swapUp = {swapActivity("midmorning", "noon")},
+//                                swapDown = {swapActivity("noon", "afternoon")})
+//
+//                Text("Afternoon")
+//                // display afternoon activity
+//                DisplayActivity(trip.days[day].activities[3],
+//                                trip = trip,
+//                                day = day,
+//                                timeSlot = "afternoon",
+//                                onEditConfirm = ::reloadJson,
+//                                swapUp = {swapActivity("noon", "afternoon")},
+//                                swapDown = {swapActivity("afternoon", "evening")})
+//
+//                Text("Evening")
+//                // display evening activity
+//                DisplayActivity(trip.days[day].activities[4],
+//                                trip = trip,
+//                                day = day,
+//                                timeSlot = "evening",
+//                                onEditConfirm = ::reloadJson,
+//                                swapUp = {swapActivity("afternoon", "evening")},
+//                                swapDown = null)
 
                 // Controls at the bottom.
                 Row{
@@ -405,13 +405,17 @@ fun WCalendar (tripData: JSONObject, exit: () -> Unit) {
 // Displays name stacked with type and priority, and up/down/edit buttons to the right of that.
 // Parameters:
 // activity: The JSON for the activity.
+// trip: The containing trip. Needed for editing the activity.
+// day: The containing day. Needed for editing the activity.
+// activityIndex: The index of the activity inside the day. Needed for editing the activity.
+// onEditConfirm: Function to call when an edit is completed. Parent should reload JSON & recompose when this is called.
 // swapUp: The function to call if the "up" button is pressed, or null; if null the Up button won't display.
 // swapDown: Same as above but for the down button.
 @Composable
 fun DisplayActivity(activity: Activity,
                     trip: Trip,
                     day: Int,
-                    timeSlot: String,
+                    activityIndex: Int,
                     onEditConfirm: (()->Unit),
                     swapUp: (() -> Unit)? = null,
                     swapDown: (() -> Unit)? = null) {
@@ -422,6 +426,8 @@ fun DisplayActivity(activity: Activity,
         Column{
             Text(activity.name)
             Text("type: " + activity.type + ", Priority: " + activity.priority)
+            // TODO: Make the time display properly
+            Text("" + activity.hour + ":" + activity.minute)
         }
 
         // Spacer so that the stuff before is left aligned and the stuff after is right aligned.
@@ -445,63 +451,61 @@ fun DisplayActivity(activity: Activity,
             Text("Edit")
         }
 
+        // Activity Editor dialog.
         if(editActivityOpen){
             ActivityEditor( onConfirm = {onEditConfirm(); editActivityOpen = false},
                             onCancel = {editActivityOpen = false},
                             trip = trip,
                             day = day,
                             activity = activity,
-                            timeslot = timeSlot)
+                            activityIndex = activityIndex)
         }
     }
 }
 
-//@Composable
-//fun ButtonExit(onClick: () -> Unit) {
-//    ElevatedButton(
-//        onClick = { onClick() },
-//        modifier = TODO(),
-//        enabled = TODO(),
-//        shape = TODO(),
-//        colors = TODO(),
-//        elevation = TODO(),
-//        border = TODO(),
-//        contentPadding = TODO(),
-//        interactionSource = TODO(),
-//        content = TODO()
-//    )
-//    Text("X")
-//}
-//
-//@Composable
-//fun ButtonNext(onClick: () -> Unit) {
-//    ElevatedButton(
-//        onClick = { onClick() },
-//        modifier = TODO(),
-//        enabled = TODO(),
-//        shape = TODO(),
-//        colors = TODO(),
-//        elevation = TODO(),
-//        border = TODO(),
-//        contentPadding = TODO(),
-//        interactionSource = TODO(),
-//        content = TODO()
-//    )
-//}
-//
-//@Composable
-//fun ButtonPrev(onClick: () -> Unit) {
-//    ElevatedButton(
-//        onClick = { onClick() },
-//        modifier = TODO(),
-//        enabled = TODO(),
-//        shape = TODO(),
-//        colors = TODO(),
-//        elevation = TODO(),
-//        border = TODO(),
-//        contentPadding = TODO(),
-//        interactionSource = TODO(),
-//        content = TODO()
-//    )
-//}
+// Create a list of activities.
+@Composable
+fun ActivityList(trip: Trip, day: Int, onEditConfirm: () -> Unit){
+    // Get context, for use in swap.
+    val context = LocalContext.current
 
+    // Swap activities at index1 and index2.
+    fun swap(index1: Int, index2: Int){
+        // Swap the activities at index1 and index2.
+        val temp = trip.days[day].activities[index1]
+        trip.days[day].activities[index1] = trip.days[day].activities[index2]
+        trip.days[day].activities[index2] = temp
+
+        // Save the JSON and call onEditConfirm; parent should reload JSON in onEditConfirm.
+        saveTripByName(context, JSONObject(Json.encodeToString(trip)))
+        onEditConfirm()
+    }
+
+    Column{
+        for(i in 0..<trip.days[day].activities.size){
+
+            // If this isn't the first one in the list, pass a swapUp function; otherwise pass null.
+            val swapUp = if(i > 0){
+                {swap(i, i-1)}
+            }else{
+                null
+            }
+
+            // If this isn't the last one in the list, pass a swapDown function; otherwise pass null.
+            val swapDown = if(i + 1 < trip.days[day].activities.size){
+                {swap(i, i+1)}
+            }else{
+                null
+            }
+
+            // Display the activity.
+            DisplayActivity(activity = trip.days[day].activities[i],
+                            trip = trip,
+                            day = day,
+                            activityIndex = i,
+                            onEditConfirm = onEditConfirm,
+                            swapUp = swapUp,
+                            swapDown = swapDown)
+        }
+    }
+} // end activityList

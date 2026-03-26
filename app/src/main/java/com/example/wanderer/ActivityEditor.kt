@@ -9,9 +9,12 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -49,9 +52,10 @@ fun ActivityEditorPreview(){
 // activity should be non-null if we're editing; if non-null, fields will be prefilled.
 // timeslot should be non-null if we're editing,
 // and must be the timeslot that the activity is slotted into on the given day.
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip, day: Int,
-                   activity: Activity? = null, timeslot: String? = null){
+                   activity: Activity? = null, activityIndex: Int? = null){
     // Initialize name field to either the passed activity name, or "" if no passed activity.
     // The "?:" operator - named the Elvis operator - has a nullable on the left and value on the right.
     // If the left operand is non-null, it evaluates to the left; otherwise it evaluates to the right.
@@ -69,10 +73,15 @@ fun ActivityEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip, day:
     var priorityExpanded by remember{mutableStateOf(false)}
     var priority by remember{mutableIntStateOf(activity?.priority ?: -1)}
 
-    // timeExpanded is whether the time slot dropdown is open.
-    // timeslot is initialized to either the timeslot given, or "" if no timeslot given.
-    var timeExpanded by remember{mutableStateOf(false)}
-    var timeSlot by remember{mutableStateOf(timeslot ?: "")}
+    // timePickerOpen is whether the time picker dialog is open.
+    // timePickerState is either initialized to 00:00, or to the values in the passed activity if it exists.
+    // timeChosen is for whether a time has been selected.
+    // It's initialized to false if there's no passed activity, else it's true.
+    var timePickerOpen by remember{mutableStateOf(false)}
+    val timePickerState = rememberTimePickerState(initialHour = activity?.hour ?: 0,
+                                                  initialMinute = activity?.minute ?: 0,
+                                                  is24Hour = false)
+    var timeChosen by remember{mutableStateOf(activity != null)}
 
     // Warning text, in case the user doesn't fill out a given field.
     var warningText by remember{mutableStateOf("")}
@@ -87,26 +96,34 @@ fun ActivityEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip, day:
             name = name,
             type = activityType,
             priority = priority,
-            address = address
+            address = address,
+            hour = timePickerState.hour,
+            minute = timePickerState.minute
         )
         // Save the data as a new activity to the file.
-        when(timeSlot){
-            "morning" -> {
-                trip.days[day].morning = activity
-            }
-            "midmorning" -> {
-                trip.days[day].midmorning = activity
-            }
-            "noon" -> {
-                trip.days[day].noon = activity
-            }
-            "afternoon" -> {
-                trip.days[day].afternoon = activity
-            }
-            "evening" -> {
-                trip.days[day].evening = activity
-            }
+        if(activityIndex == null){
+            trip.days[day].insertActivity(activity)
+        }else{
+            trip.days[day].activities[activityIndex] = activity
         }
+        // TODO fix this to work with the new system
+//        when(timeSlot){
+//            "morning" -> {
+//                trip.days[day].morning = activity
+//            }
+//            "midmorning" -> {
+//                trip.days[day].midmorning = activity
+//            }
+//            "noon" -> {
+//                trip.days[day].noon = activity
+//            }
+//            "afternoon" -> {
+//                trip.days[day].afternoon = activity
+//            }
+//            "evening" -> {
+//                trip.days[day].evening = activity
+//            }
+//        }
 
         saveTripByName(context, JSONObject(Json.encodeToString(trip)))
     }
@@ -163,42 +180,64 @@ fun ActivityEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip, day:
 
             // Time slot (dropdown menu)
             // We only allow this to open if we're not editing.
-            if(activity == null) {
-                Box(
-                    modifier = Modifier
-                        .padding(16.dp)
-                ) {
-                    Button(onClick = { timeExpanded = !timeExpanded }) {
-                        Text("Select time")
-                    }
-                    DropdownMenu(
-                        expanded = timeExpanded,
-                        onDismissRequest = { timeExpanded = false },
-                        content =
-                            {
-                                DropdownMenuItem(
-                                    text = { Text("Morning") },
-                                    onClick = { timeSlot = "morning"; timeExpanded = false }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Mid-morning") },
-                                    onClick = { timeSlot = "midmorning"; timeExpanded = false }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Noon") },
-                                    onClick = { timeSlot = "noon"; timeExpanded = false }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Afternoon") },
-                                    onClick = { timeSlot = "afternoon"; timeExpanded = false }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Evening") },
-                                    onClick = { timeSlot = "evening"; timeExpanded = false }
-                                )
-                            })
+//            if(activity == null) {
+//                Box(
+//                    modifier = Modifier
+//                        .padding(16.dp)
+//                ) {
+//                    Button(onClick = { timeExpanded = !timeExpanded }) {
+//                        Text("Select time")
+//                    }
+//                    DropdownMenu(
+//                        expanded = timeExpanded,
+//                        onDismissRequest = { timeExpanded = false },
+//                        content =
+//                            {
+//                                DropdownMenuItem(
+//                                    text = { Text("Morning") },
+//                                    onClick = { timeSlot = "morning"; timeExpanded = false }
+//                                )
+//                                DropdownMenuItem(
+//                                    text = { Text("Mid-morning") },
+//                                    onClick = { timeSlot = "midmorning"; timeExpanded = false }
+//                                )
+//                                DropdownMenuItem(
+//                                    text = { Text("Noon") },
+//                                    onClick = { timeSlot = "noon"; timeExpanded = false }
+//                                )
+//                                DropdownMenuItem(
+//                                    text = { Text("Afternoon") },
+//                                    onClick = { timeSlot = "afternoon"; timeExpanded = false }
+//                                )
+//                                DropdownMenuItem(
+//                                    text = { Text("Evening") },
+//                                    onClick = { timeSlot = "evening"; timeExpanded = false }
+//                                )
+//                            })
+//                }
+//            } // end time select dropdown
+
+
+
+            // Time dialog menu
+            Box(modifier = Modifier
+                .padding(16.dp)){
+                Button(onClick = {timePickerOpen = true}) {
+                    Text("Select time")
                 }
-            } // end time select dropdown
+            }
+            if(timePickerOpen){
+                Dialog(onDismissRequest = {timePickerOpen = false}){
+                    Column{
+                        TimePicker(state = timePickerState)
+                        // When the time picker is done, we want to set timeChosen so we know the user chose something.
+                        Button(onClick = {timePickerOpen = false; timeChosen = true}){
+                            Text("Ok")
+                        }
+                    }
+                }
+            }
+
 
 
 
@@ -252,8 +291,8 @@ fun ActivityEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip, day:
                         warningText = "Must select an activity type"
                         return@Button
                     }
-                    if (timeSlot == ""){
-                        warningText = "Must select a time slot"
+                    if(!timeChosen){
+                        warningText = "Must select a time"
                         return@Button
                     }
                     if (priority == -1){
