@@ -15,7 +15,28 @@ import java.time.temporal.ChronoUnit
 
 // Data class for Activities.
 @Serializable
-data class Activity(val name: String, val type: String, val priority: Int, val address: String, val hour: Int, val minute: Int) {
+data class Activity(val name: String, val type: String, val priority: Int, val address: String, val hour: Int, val minute: Int): Comparable<Activity> {
+    // Compare this to the passed object.
+    // Returns 0 if this equals the other object, negative if this is less than other,
+    // and positive if this is greater than other.
+    override fun compareTo(other: Activity): Int {
+        // First compare hours of each object.
+        if(this.hour < other.hour){
+            return -1
+        }else if(this.hour > other.hour){
+            return 1
+        }
+
+        // Then, if the hours are equal, compare minutes.
+        if(this.minute < other.minute){
+            return -1
+        }else if(this.minute > other.minute){
+            return 1
+        }
+
+        // Then, if both are equal, return 0.
+        return 0
+    }
 
     companion object {
         // Create a default Activity object.
@@ -30,9 +51,20 @@ data class Activity(val name: String, val type: String, val priority: Int, val a
 // Data class for Days.
 @Serializable
 data class Day(var activities: MutableList<Activity>){
+
+    // Inserts a new activity into the list. This preserves the list being sorted.
     fun insertActivity(activity: Activity){
-        activities.add(activity)
+        // Find where in the list to add it.
+        var index = 0;
+        while(index < activities.size && activity > activities[index]){
+            index++
+        }
+
+        // Add it to the list.
+        activities.add(index, activity)
     }
+
+    
     companion object{
         // Create a default Day object.
         // All fields are initialized to default Activities.
