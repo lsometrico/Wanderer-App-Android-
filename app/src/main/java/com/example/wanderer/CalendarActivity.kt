@@ -1,5 +1,6 @@
 package com.example.wanderer
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
@@ -426,8 +427,7 @@ fun DisplayActivity(activity: Activity,
         Column{
             Text(activity.name)
             Text("type: " + activity.type + ", Priority: " + activity.priority)
-            // TODO: Make the time display properly
-            Text("" + activity.hour + ":" + activity.minute)
+            TimeDisplay(activity.hour, activity.minute)
         }
 
         // Spacer so that the stuff before is left aligned and the stuff after is right aligned.
@@ -509,3 +509,19 @@ fun ActivityList(trip: Trip, day: Int, onEditConfirm: () -> Unit){
         }
     }
 } // end activityList
+
+// Displays the time in the format HH:MM [AM/PM]; ex. 01:53 PM
+// Parameters:
+// hour: The hour. Should be between 0 and 23. This uses 24-hour time as inputs.
+// minute: The minute. Should be between 0 and 59.
+@SuppressLint("DefaultLocale")
+@Composable
+fun TimeDisplay(hour: Int, minute: Int){
+    val ampm = if (hour < 12) {"AM"} else {"PM"}
+    var displayHour = hour % 12
+    if (displayHour == 0){
+        displayHour = 12
+    }
+
+    Text(String.format("%02d:%02d %s", displayHour, minute, ampm))
+}
