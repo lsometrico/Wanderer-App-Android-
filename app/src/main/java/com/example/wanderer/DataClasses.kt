@@ -64,7 +64,7 @@ data class Day(var activities: MutableList<Activity>){
         activities.add(index, activity)
     }
 
-    
+
     companion object{
         // Create a default Day object.
         // All fields are initialized to default Activities.

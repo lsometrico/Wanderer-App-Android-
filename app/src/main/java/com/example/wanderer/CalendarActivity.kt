@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.window.Dialog
 import com.example.wanderer.JsonStorage.loadAllTrips
 import com.example.wanderer.JsonStorage.loadTripByName
 import com.example.wanderer.JsonStorage.saveTripByName
@@ -309,7 +310,7 @@ fun WCalendar (tripData: JSONObject, exit: () -> Unit) {
                 Text("Day $day")
 
                 // List of time slots.
-                ActivityList(trip, 0, ::reloadJson)
+                ActivityList(trip, day, ::reloadJson)
 //                Text("Morning")
 //                // display morning activity
 //                DisplayActivity(activity = trip.days[day].activities[0],
@@ -421,6 +422,9 @@ fun DisplayActivity(activity: Activity,
                     swapUp: (() -> Unit)? = null,
                     swapDown: (() -> Unit)? = null) {
     var editActivityOpen by remember{mutableStateOf(false)}
+    var deleteDialogOpen by remember{mutableStateOf(false)}
+
+    val context = LocalContext.current
 
     Row{
         // Display information about the activity; name, type, priority
@@ -450,6 +454,35 @@ fun DisplayActivity(activity: Activity,
         Button(onClick = {editActivityOpen = true}){
             Text("Edit")
         }
+
+        // Button to delete activity
+        Button(onClick = {deleteDialogOpen = true}){
+            Text("Delete")
+        }
+
+        // Delete dialog
+        if(deleteDialogOpen){
+            Dialog(onDismissRequest = {deleteDialogOpen = false}){
+                Column{
+                    Text("Are you sure you want to delete?")
+                    Row{
+                        // delete
+                        Button(onClick = {
+                            trip.days[day].activities.removeAt(activityIndex)
+                            saveTripByName(context, JSONObject(Json.encodeToString(trip)))
+                            onEditConfirm()
+                            deleteDialogOpen = false
+                        }){
+                            Text("Yes")
+                        }
+                        Button(onClick = {deleteDialogOpen = false}){
+                            Text("No")
+                        }
+                    }
+                }
+            }
+        }
+
 
         // Activity Editor dialog.
         if(editActivityOpen){
