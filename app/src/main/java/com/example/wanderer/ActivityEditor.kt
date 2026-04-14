@@ -32,6 +32,7 @@ import com.example.wanderer.ui.theme.WandererTheme
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
 
+// Preview for the activity editor.
 @Preview
 @Composable
 fun ActivityEditorPreview(){
@@ -106,24 +107,6 @@ fun ActivityEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip, day:
         }else{
             trip.days[day].activities[activityIndex] = activity
         }
-        // TODO fix this to work with the new system
-//        when(timeSlot){
-//            "morning" -> {
-//                trip.days[day].morning = activity
-//            }
-//            "midmorning" -> {
-//                trip.days[day].midmorning = activity
-//            }
-//            "noon" -> {
-//                trip.days[day].noon = activity
-//            }
-//            "afternoon" -> {
-//                trip.days[day].afternoon = activity
-//            }
-//            "evening" -> {
-//                trip.days[day].evening = activity
-//            }
-//        }
 
         saveTripByName(context, JSONObject(Json.encodeToString(trip)))
     }
@@ -177,48 +160,6 @@ fun ActivityEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip, day:
             } // end type dropdown
 
 
-
-            // Time slot (dropdown menu)
-            // We only allow this to open if we're not editing.
-//            if(activity == null) {
-//                Box(
-//                    modifier = Modifier
-//                        .padding(16.dp)
-//                ) {
-//                    Button(onClick = { timeExpanded = !timeExpanded }) {
-//                        Text("Select time")
-//                    }
-//                    DropdownMenu(
-//                        expanded = timeExpanded,
-//                        onDismissRequest = { timeExpanded = false },
-//                        content =
-//                            {
-//                                DropdownMenuItem(
-//                                    text = { Text("Morning") },
-//                                    onClick = { timeSlot = "morning"; timeExpanded = false }
-//                                )
-//                                DropdownMenuItem(
-//                                    text = { Text("Mid-morning") },
-//                                    onClick = { timeSlot = "midmorning"; timeExpanded = false }
-//                                )
-//                                DropdownMenuItem(
-//                                    text = { Text("Noon") },
-//                                    onClick = { timeSlot = "noon"; timeExpanded = false }
-//                                )
-//                                DropdownMenuItem(
-//                                    text = { Text("Afternoon") },
-//                                    onClick = { timeSlot = "afternoon"; timeExpanded = false }
-//                                )
-//                                DropdownMenuItem(
-//                                    text = { Text("Evening") },
-//                                    onClick = { timeSlot = "evening"; timeExpanded = false }
-//                                )
-//                            })
-//                }
-//            } // end time select dropdown
-
-
-
             // Time dialog menu
             Box(modifier = Modifier
                 .padding(16.dp)){
@@ -237,8 +178,6 @@ fun ActivityEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip, day:
                     }
                 }
             }
-
-
 
 
             // Priority (dropdown menu)

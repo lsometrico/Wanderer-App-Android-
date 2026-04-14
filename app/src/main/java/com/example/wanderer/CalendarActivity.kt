@@ -41,12 +41,9 @@ import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import kotlin.jvm.java
 
-//screen for calendar
-//Calendar: must be passed JSON name for loadJSON() method call
-//needs exit button, and prev and next arrows for multi-day trips (R2)
-//needs tracking for previous screens so we know when the days in trip will 'run out',
-// likely a NavController and NavGraph
-
+// Activity for the Calendar.
+// Must be passed the tripName of the trip being opened.
+// Will crash if the trip name is not a valid trip in the trip JSON.
 class CalendarActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
@@ -90,7 +87,6 @@ class CalendarActivity : ComponentActivity() {
                 }
             ]
             }]""".trimMargin())
-//        val tripData = allTripsData.getJSONObject(0)
 
 
         // The trip MUST exist in the JSON when CalendarActivity is made or it'll crash.
@@ -101,12 +97,6 @@ class CalendarActivity : ComponentActivity() {
         val appData = loadAllTrips(applicationContext)
         val tripData = appData.find{trip -> trip.getString("tripName") == tripName}!!
 
-
-//        val tripData = JSONObject("[{\"tripName\":\"test\"}]")
-
-        //load Intent first so setContent has proper variables to pass
-//        val tripName = tripIntent.getJSONObject("tripJSON")
-//        val tripDay = tripIntent.getInt(day=1)
         setContent {
             WCalendar (tripData, ::exit)
         }
@@ -114,40 +104,6 @@ class CalendarActivity : ComponentActivity() {
 
     fun exit(){
         this.finish()
-    }
-    //both calendar Activity and MainActivity pass tripJSON
-    //only calendar Activity passes day:Int. default is set as one
-    // so MainActivity pass does not error
-
-//    //function that sends UI back to TripView upon onClick ButtonExit
-//    fun ExitToMain () {
-//        val exitI = Intent(applicationContext.MainActivity)
-//        startActiivty(intent=exitI)
-//    }
-//
-//    //future handling for multi-day trips, error handling for if button exists in composable
-//    fun NextDay() {
-//        val nextI = Intent(applicationContext.CalendarActivity::class.java)
-//        nextI.putExtra("trip_name", tripName)
-//        nextI.puExtra("day", (day+1))
-//        startActivity(nextI)
-//    }
-//    fun PrevDay() {
-//        val nextI = Intent(applicationContext.CalendarActivity::class.java)
-//        nextI.putExtra("trip_name", tripName)
-//        nextI.putExtra("day", (day-1))
-//        startActivity(prevI)
-//    }
-}
-
-@Composable
-fun WCalendarPreview(tripData: JSONObject){
-    //if anyone wants to try to make our JSON in Kotlin, knock yourself out. ¯\_ (ツ)_/¯
-
-    fun fakeExit(){}
-
-    WandererTheme {
-        WCalendar(tripData, exit = ::fakeExit)
     }
 }
 
@@ -158,7 +114,7 @@ fun WCalendarPreview(tripData: JSONObject){
 // Probably once it's more stabilized.
 
 //assumed JSON approach:
-
+// TODO adjust this comment
 //-days in trip in a JSON
 //-sectioned day timeslots are in an array or always length 5
 //TripA = { "TripName" : {
@@ -193,32 +149,14 @@ fun WCalendar (tripData: JSONObject, exit: () -> Unit) {
 
     // Stores current day.
     var day by remember{ mutableIntStateOf(0) }
-    //day is the passed day that is somehow saved/counted from previous Calendar traversals. the Navigator may need a variable for this
-    //must pass trip name from onClick from tripView or something?
-//    val tripJSONObject = loadTripByName(LocalContext.current, trip_name)!!
-    //pass day via NavController by checking against prev screens???
-//    val tripDay: JSONArray = tripData.getJSONArray(day.toString())
 
-    //iterate thru array: key is main breakout, value key is activity name, value's value is all related variable information
-    //if priority: set color
-    //if type: set logo
-    //if notes not null, make activity click to view notes, else no notes view
-
-    //Buttons:
-    //ButtonExit() ~~always there, take back to tripView
-
-    //if (day != tripData.startdate) { ButtonPrev() } //may need to relate to state or NavController for this logic
-    //if (day != tripData.enddate) { ButtonNext() } //as above
-
-    // Test to decode JSON into classes.
     // Next I want to convert the whole trip JSON to a Trip object in a Remember block so it can be easily edited.
-//    val serializedDay = Json.decodeFromString<Day>(tripData
-//                .getJSONArray("days")
-//                .getJSONObject(0)
-//                .toString())
     var trip by remember{mutableStateOf(Json.decodeFromString<Trip>(tripData.toString()))}
 
+    // Can be set to force a recompose.
     var forceRecompose by remember{mutableStateOf(true)}
+
+    // Whether the activity menu is open.
     var showAddActivityMenu by remember{mutableStateOf(false)}
 
     val context = LocalContext.current
@@ -238,69 +176,6 @@ fun WCalendar (tripData: JSONObject, exit: () -> Unit) {
         showAddActivityMenu = false
     }
 
-    // Function to swap activities. Not done yet since I realized you can't edit JSON objects directly.
-    fun swapActivity(time1: String, time2: String){
-//        // Takes in a time, and returns the corresponding activity of the relevant day of trip.
-//        fun timeToActivity(time: String): Activity{
-//            return when (time) {
-//                "morning" -> {
-//                    trip.days[day].morning
-//                }
-//                "midmorning" -> {
-//                    trip.days[day].midmorning
-//                }
-//                "noon" -> {
-//                    trip.days[day].noon
-//                }
-//                "afternoon" -> {
-//                    trip.days[day].afternoon
-//                }
-//                else -> /* time1 == "evening"*/ {
-//                    trip.days[day].evening
-//                }
-//            }
-//        }
-//
-//        // Takes in an activity and a time, and sets the corresponding field of the relevant day of trip.
-//        fun setActivityFromTime(activity: Activity, time: String){
-//            when (time) {
-//                "morning" -> {
-//                    trip.days[day].morning = activity
-//                }
-//                "midmorning" -> {
-//                    trip.days[day].midmorning = activity
-//                }
-//                "noon" -> {
-//                    trip.days[day].noon = activity
-//                }
-//                "afternoon" -> {
-//                    trip.days[day].afternoon = activity
-//                }
-//                else -> /* time1 == "evening"*/ {
-//                    trip.days[day].evening = activity
-//                }
-//            }
-//        }
-//
-//        // Standard swap but using the above functions.
-//
-//        // Assign activity 1 to temp.
-//        val temp = timeToActivity(time1)
-//
-//        // Assign activity 2 to activity 1.
-//        setActivityFromTime(timeToActivity(time2), time1)
-//
-//        // Assign temp to activity 2.
-//        setActivityFromTime(temp, time2)
-//
-//
-//        // Save the JSON.
-//        saveTripByName(context, JSONObject(Json.encodeToString(trip)))
-//
-//        // Hack to force a recompose
-//        forceRecompose = true;
-//        forceRecompose = false;
-    } // end swapActivity
 
     WandererTheme{
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -311,55 +186,6 @@ fun WCalendar (tripData: JSONObject, exit: () -> Unit) {
 
                 // List of time slots.
                 ActivityList(trip, day, ::reloadJson)
-//                Text("Morning")
-//                // display morning activity
-//                DisplayActivity(activity = trip.days[day].activities[0],
-//                                trip = trip,
-//                                day = day,
-//                                timeSlot = "morning",
-//                                onEditConfirm = ::reloadJson,
-//                                swapUp = null,
-//                                swapDown = {swapActivity("morning", "midmorning")})
-//
-//                Text("Midmorning")
-//                // display midmorning activity
-//                DisplayActivity(trip.days[day].activities[1],
-//                                trip = trip,
-//                                day = day,
-//                                timeSlot = "midmorning",
-//                                onEditConfirm = ::reloadJson,
-//                                swapUp = {swapActivity("morning", "midmorning")},
-//                                swapDown = {swapActivity("midmorning", "noon")})
-//
-//                Text("Noon")
-//                // display noon activity
-//                DisplayActivity(trip.days[day].activities[2],
-//                                trip = trip,
-//                                day = day,
-//                                timeSlot = "noon",
-//                                onEditConfirm = ::reloadJson,
-//                                swapUp = {swapActivity("midmorning", "noon")},
-//                                swapDown = {swapActivity("noon", "afternoon")})
-//
-//                Text("Afternoon")
-//                // display afternoon activity
-//                DisplayActivity(trip.days[day].activities[3],
-//                                trip = trip,
-//                                day = day,
-//                                timeSlot = "afternoon",
-//                                onEditConfirm = ::reloadJson,
-//                                swapUp = {swapActivity("noon", "afternoon")},
-//                                swapDown = {swapActivity("afternoon", "evening")})
-//
-//                Text("Evening")
-//                // display evening activity
-//                DisplayActivity(trip.days[day].activities[4],
-//                                trip = trip,
-//                                day = day,
-//                                timeSlot = "evening",
-//                                onEditConfirm = ::reloadJson,
-//                                swapUp = {swapActivity("afternoon", "evening")},
-//                                swapDown = null)
 
                 // Controls at the bottom.
                 Row{

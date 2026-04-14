@@ -12,7 +12,6 @@ Wanderer is an Android application that will provide functionality as a travel i
 - Keep track of activities, and easily change times/details as needed
 - Arbitrary numbers of activities per day in an auto-sorted list
 - Fully offline; no Internet connection required
-- [other stuff]
 
 ## Setup & Usage
 [install APK somehow]
@@ -22,6 +21,6 @@ This app uses Kotlin with the Jetpack Compose library, as well as the Kotlinx Se
 
 ## Team Members
 
-Michael Gonzalez-Vasquez: Lead Designer
-Jaedon Snyder: Lead Programmer
+Michael Gonzalez-Vasquez: Lead Designer<br/>
+Jaedon Snyder: Lead Programmer<br/>
 Sylas Wilson: Documentation Lead
