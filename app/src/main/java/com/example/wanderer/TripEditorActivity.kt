@@ -1,70 +1,29 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.example.wanderer
-import android.content.Context
-import android.graphics.Color
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DatePickerFormatter
-import androidx.compose.material3.DatePickerState
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.wanderer.JsonStorage.deleteTrip
-import com.example.wanderer.JsonStorage.loadAllTrips
-import com.example.wanderer.JsonStorage.loadTripByName
 import com.example.wanderer.JsonStorage.saveTrip
-import com.example.wanderer.JsonStorage.saveTripByName
 import com.example.wanderer.ui.theme.WandererTheme
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import java.util.Date
-import java.util.Locale
-import kotlin.math.sqrt
 
-//class TripEditorActivity : ComponentActivity() {
-//    override fun onCreate(savedInstanceState: Bundle?){
-//        super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
-//        setContent {
-//            TripEditor({ oldName, name, arrivalDate, departureDate ->
-//                                    finalize(oldName, name, arrivalDate, departureDate) },
-//                    {cancel()})
-//        }
-//    }
-//
-//    fun finalize(oldName: String, name: String, arrivalDate: Date, departureDate: Date){
-//
-//    }
-//
-//    fun cancel(){
-//
-//    }
-//}
 
 @Preview
 @Composable
@@ -124,7 +83,7 @@ fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip? = null){
             // Reassign fields, then save modified data
             trip.tripName = name;
             trip.arrivalDate = arrivalDate.selectedDateMillis!!
-            trip.departureDate = arrivalDate.selectedDateMillis!!
+            trip.departureDate = departureDate.selectedDateMillis!!
             saveTrip(context, JSONObject(Json.encodeToString(trip)))
         }else{
             // Create a new trip and save it.
@@ -137,69 +96,124 @@ fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip? = null){
         }
     } // end appendToJson
 
+
+    //back to jetpack compose
+    //this is the styling for the entire add/edit trip dialog
+    //because of colors already being set in color.kt, the program
+    //uses those as their default and need no styling
+
     Dialog (onDismissRequest = onCancel){
-        Column {
-            // Top-of-menu text
-            // Color is there temporarily since for some reason it renders as black-on-black in the preview.
-            Text(text = "Add/edit trip:", color = androidx.compose.ui.graphics.Color.White)
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // top of menu text saying "add/edit"
+                Text(
+                    text = "Add/edit trip:",
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = MaterialTheme.typography.headlineLarge.fontFamily
+                    ),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 20.dp)
+                )
 
+                // field to enter trip name
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { s -> name = s },
+                    label = { Text("Trip Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
 
-            // Trip name
-            // See above for color note.
-            Text(text = "Name:", color = androidx.compose.ui.graphics.Color.White)
-            TextField(
-                value = name,
-                onValueChange = {s -> name = s}
-            )
+                Spacer(modifier = Modifier.height(16.dp))
 
-
-            // Arrival Date picker
-            DatePopupPicker(arrivalDate, name = "Arrival Date")
-            // Departure Date picker
-            DatePopupPicker(departureDate, name = "Departure Date")
-
-
-            // Confirm button
-            Button(onClick = {
-                // Check to ensure that name, arrival, and departure are selected.
-                // Arrival and departure check MUST be present, or
-                //   we'll have a NullException when it's asserted to be non-null in appendToJson.
-                // Also check that departureDate is >= arrivalDate.
-                // I'm allowing them being equal so that trips of length 1 are OK.
-                if (name == ""){
-                    warningText = "Must enter a name."
-                    return@Button
+                // Date pickers in a row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        DatePopupPicker(arrivalDate, name = "Arrival")
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        DatePopupPicker(departureDate, name = "Departure")
+                    }
                 }
-                if (arrivalDate.selectedDateMillis == null){
-                    warningText = "Must select an arrival date."
-                    return@Button
-                }
-                if (departureDate.selectedDateMillis == null){
-                    warningText = "Must select a departure date."
-                    return@Button
-                }
-                if (departureDate.selectedDateMillis!! < arrivalDate.selectedDateMillis!!){
-                    warningText = "Departure date must be later than arrival date."
-                    return@Button
+
+                if (warningText.isNotEmpty()) {
+                    Text(
+                        text = warningText,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
 
-                // Then append to JSON and inform the caller of completion.
-                // Caller will probably respond by hiding this menu and reloading their JSON.
-                appendToJson()
-                onConfirm()
-            }) {
-                Text("Confirm")
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // buttons at the bottom; if dialogs are empty they will prompt the message
+                // according to what is missing
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    if (trip != null) {
+                        TextButton(
+                            onClick = {
+                                deleteTrip(context, trip.tripName)
+                                onConfirm()
+                            },
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Text("Delete")
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(onClick = onCancel) {
+                            Text("Cancel")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                if (name == "") {
+                                    warningText = "Must enter a name."
+                                    return@Button
+                                }
+                                if (arrivalDate.selectedDateMillis == null) {
+                                    warningText = "Must select an arrival date."
+                                    return@Button
+                                }
+                                if (departureDate.selectedDateMillis == null) {
+                                    warningText = "Must select a departure date."
+                                    return@Button
+                                }
+                                if (departureDate.selectedDateMillis!! < arrivalDate.selectedDateMillis!!) {
+                                    warningText = "Departure date must be later than arrival date."
+                                    return@Button
+                                }
+                                appendToJson()
+                                onConfirm()
+                            },
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Confirm")
+                        }
+                    }
+                }
             }
-
-
-            // Cancel button
-            Button(onClick = onCancel) {
-                Text("Cancel")
-            }
-
-            // Warning text, for invalid name and whatnot.
-            // See top-of-menu text for color note.
-            Text(warningText, color = androidx.compose.ui.graphics.Color.White)
         }
     }
 }
@@ -213,7 +227,6 @@ fun DatePopupPicker(datePickerState: DatePickerState, name: String){
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-//                    val selectedDate = datePickerState.selectedDateMillis
                     showDatePicker = false
                 }) {
                     Text("OK")
@@ -224,7 +237,11 @@ fun DatePopupPicker(datePickerState: DatePickerState, name: String){
         }
     }
 
-    Button(onClick = { showDatePicker = true }) {
+    OutlinedButton(
+        onClick = { showDatePicker = true },
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp)
+    ) {
         Text(name)
     }
 }

@@ -132,9 +132,13 @@ fun TripButton(trip: Trip, onConfirm: () -> Unit){
     var openEditTripMenu by remember{mutableStateOf(false)}
     val context = LocalContext.current
 
-    // more pain
-    // display trip name and the trip edit button inside a card
+    // logic switched out; no more plus button instead we just have the card to click
     Card(
+        onClick = {
+            val intent = Intent(context, CalendarActivity::class.java)
+            intent.putExtra("tripName", trip.tripName)
+            context.startActivity(intent)
+        },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
@@ -159,18 +163,7 @@ fun TripButton(trip: Trip, onConfirm: () -> Unit){
             )
             
             Row {
-                // When clicked, it opens its associated CalendarActivity.
-                IconButton(onClick = {
-                    val intent = Intent(context, CalendarActivity::class.java)
-                    intent.putExtra("tripName", trip.tripName)
-                    context.startActivity(intent)
-                }){
-                    Icon(
-                        imageVector = Icons.Default.Add, // Placeholder for "View"
-                        contentDescription = "Open Calendar",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
+                // no more plus on card to access, you just press the card to access it
                 
                 // Edit button
                 IconButton(onClick = { openEditTripMenu = true }){
