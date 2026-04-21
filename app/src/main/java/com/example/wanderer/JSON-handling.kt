@@ -73,6 +73,35 @@ object JsonStorage {
         return uniqueName // Return so the caller knows what name was actually used
     }
 
+    // Saves a trip to itineraries.json.
+    // If the trip name already exists, it is *overridden* with the new trip data.
+    // Otherwise, it's appended like normal.
+    fun saveTripByName(context: Context, tripData: JSONObject) {
+        require(tripData.has("tripName")) { "tripData must contain a 'tripName' field." }
+
+        var trips = loadAllTrips(context)
+        // Replace any trip with the same name as the passed one with a new trip.
+        // There should be one or zero.
+        // If zero we'll append normally.
+        var found = false
+        trips = trips.map{ trip ->
+            if(trip.getString("tripName") == tripData.getString("tripName")){
+                found = true
+                tripData
+            }else{
+                trip
+            }
+        }
+
+        // Append to trips if it didn't replace one already.
+        if(!found){
+            trips = trips.plus(tripData)
+        }
+
+        // Then write all trips.
+        writeAllTrips(context, JSONArray(trips))
+    }
+
   //load trips as JSON objects
     fun loadAllTrips(context: Context): List<JSONObject> {
         val trips = readAllTrips(context)

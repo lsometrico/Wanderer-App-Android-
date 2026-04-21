@@ -1,175 +1,178 @@
 package com.example.wanderer
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.material3.Button
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.wanderer.JsonStorage.loadAllTrips
 import com.example.wanderer.ui.theme.WandererTheme
+import kotlinx.serialization.json.Json
+import org.json.JSONObject
 
 
+// Activity class for the Trip View; first view the user sees on starting up the app.
 class MainActivity : ComponentActivity() {
-//    val text = mutableStateOf("test1")
-
+    // Ran on startup.
     override fun onCreate(savedInstanceState: Bundle?) {
-//        val someText by text
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             MainPreview()
-//            WandererTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Column{
-//                        Greeting(
-//                            name = someText,
-//                            modifier = Modifier.padding(innerPadding)
-//                        )
-//                        Button { click() }
-//                    }
-//                }
-//            }
         }
     }
-//
-//    fun click(){
-//        text.value = "test2"
-//    }
 }
 
-// Fake not-real pretend JSON handling so I can make sure the trip editor logic works.
-var PRETEND_JSON_HANDLING: ArrayList<Trip> = ArrayList<Trip>()
-
-class Trip
-constructor(name: String, arrivalDate: Long, departureDate: Long)
-{
-    val name: String = name
-    // Arrival & departure are time at start of date from epoch in milliseconds.
-    // Not fully sure which epoch. Should be obtained from DatePickerState.selectedDateMillis.
-    val arrivalDate: Long = arrivalDate
-    val departureDate: Long = departureDate
-
-    // TODO function to convert this to a JSONObject so that JSON-handling.kt can write it properly.
-    fun toJSONObject(){
-
-    }
-}
-
-@Composable
-fun Button(onClick: () -> Unit){
-    Button(onClick){
-        Text("button")
-    }
-}
-
-
+// Trip View composable.
 @Preview(showBackground = true)
 @Composable
 fun MainPreview(){
-    // A text value that we can update, and associated UI elements will automatically update with it.
-    val text = remember<MutableState<String>>({mutableStateOf("test1")})
-    val someText by text
-    // A list of text that we can update, and associated UI elements will automatically update with it.
-    val textList = remember( {mutableStateListOf<String>("a", "b")})
-
+    // Controls whether the add trip dialog is open or not.
     var openAddTripDialog by remember{mutableStateOf(false)}
+    // The application context; needed for loadJson.
+    val context = LocalContext.current
 
-    // Function for button; this will change the top text to "test2" and will add new text ("4").
-    fun click(){
-        text.value = "test2"
-        textList.add("4")
+    // Load the JSON and return it as a list of trips.
+    fun loadJson(): List<Trip>{
+        return loadAllTrips(context)
+            .map<JSONObject, Trip> { obj: JSONObject -> Json.decodeFromString<Trip>(obj.toString()) }
     }
 
-    // Load initial JSON here.
-    // For now, I'll just have an example trip list.
-    var triplist = ArrayList<Trip>(listOf(
-        Trip(name = "Denver", arrivalDate = 0, departureDate = 2000),
-        Trip(name = "Aurora", arrivalDate = 0, departureDate = 2000),
-        Trip(name = "Boulder", arrivalDate = 0, departureDate = 2000)
-    ))
+    // Stores the list of trips.
+    var tripList = loadJson()
 
-    // Reloads the JSON.
-    // Called when a trip gets added.
-    // TODO: Non-temporary code
+    // Reloads the JSON and closes the addActivity menu.
+    // Called when a trip gets added (confirm button is pressed).
     fun reloadJson(){
-        // Temporary code until we merge real JSON handling in.
-        triplist = PRETEND_JSON_HANDLING
+        tripList = loadJson()
+        // Bizarrely, it doesn't seem to recompose properly on trip edit unless I assign to this a couple times.
+        // Very weird hack.
+        openAddTripDialog = false
+        openAddTripDialog = true
+        openAddTripDialog = false
     }
 
     // Main display thing.
     // Don't know what the theme means yet.
+
+    // i know what it means: pain :^)
+    // main theme integration using scaffolding
     WandererTheme {
-        // Don't know what scaffold means yet.
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            // Arrange elements in a column.
-            Column(modifier = Modifier.padding(innerPadding)){
-                // Title
-                Text("Wanderer")
+        // scaffold is basically the way to set up layers on an app
+        // you just put things on top of one another to make them look nice
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            floatingActionButton = {
+                // set up a floating button at the bottom
+                FloatingActionButton(
+                    onClick = { openAddTripDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    shape = RoundedCornerShape(30.dp)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Trip")
+                }
+            }
+        ) { innerPadding ->
+            // arrange elements in a column and set padding (space around)
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp, vertical = 24.dp)
+            ){
+                // application title; goes at the top
+                Text(
+                    text = "Wanderer",
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontFamily = MaterialTheme.typography.headlineLarge.fontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 48.sp,
+                        letterSpacing = 2.sp,
+
+                    ),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
 
                 // Trip list
-                TripList(triplist, ::reloadJson)
+                TripList(tripList, ::reloadJson)
 
-                // Add trip button
-                Button(onClick = {openAddTripDialog = true}){
-                    Text("+")
-                }
-
+                // The add/edit trip dialog.
                 if(openAddTripDialog){
                     TripEditor(::reloadJson, { openAddTripDialog = false })
                 }
-//                // See Greeting function above; adds some text saying "Hello <name>!".
-//                // We use someText here so we can modify it by the button.
-//                // Don't know what the modifier means yet.
-//                Greeting(
-//                    name = someText,
-//                    modifier = Modifier.padding(innerPadding)
-//                )
-//                // Add a button that calls click() when you click it.
-//                Button { click() }
-//                // "LazyColumn" allows for a dynamically-updating column of things.
-//                // I'm thinking we'll use a LazyColumn for the trip view list.
-//                LazyColumn{
-//                    // This will read textList and create corresponding Text UI elements.
-//                    items(textList){ text ->
-//                        Text(text)
-//                    }
-//                }
             }
         }
     }
 }
 
+// The card & buttons to display a Trip.
 @Composable
 fun TripButton(trip: Trip, onConfirm: () -> Unit){
     var openEditTripMenu by remember{mutableStateOf(false)}
+    val context = LocalContext.current
 
-    // Display the trip name and the trip edit button.
-    // TODO: Display dates
-    Row{
-        Button(onClick = {}){
-            Text(trip.name)
-        }
-        Button(onClick = {openEditTripMenu = true}){
-            Text("Edit")
+    // logic switched out; no more plus button instead we just have the card to click
+    Card(
+        onClick = {
+            val intent = Intent(context, CalendarActivity::class.java)
+            intent.putExtra("tripName", trip.tripName)
+            context.startActivity(intent)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
+            // Trip name text.
+            Text(
+                text = trip.tripName,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f)
+            )
+            
+            Row {
+                // no more plus on card to access, you just press the card to access it
+                
+                // Edit button
+                IconButton(onClick = { openEditTripMenu = true }){
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Trip",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
         }
     }
 
@@ -182,19 +185,23 @@ fun TripButton(trip: Trip, onConfirm: () -> Unit){
             },
             onCancel = {
                 openEditTripMenu = false
-            }
+            },
+            trip = trip
         )
     }
 }
 
+// A preview for TripButton.
 @Preview
 @Composable
 fun TripButtonPreview(){
-    val exampleTrip = Trip(name = "Tahiti", arrivalDate = 0, departureDate = 2000)
-
-    TripButton(exampleTrip, {})
+    WandererTheme {
+        val exampleTrip = Trip(tripName = "Tahiti", arrivalDate = 0, departureDate = 2000, days=emptyArray())
+        TripButton(exampleTrip, {})
+    }
 }
 
+// Display a list of trips (as buttons), with associated edit buttons as well.
 @Composable
 fun TripList(tripList: List<Trip>, onConfirm: () -> Unit){
     // Put each trip into a column.
@@ -207,23 +214,17 @@ fun TripList(tripList: List<Trip>, onConfirm: () -> Unit){
     }
 }
 
+// A preview for TripList.
 @Preview
 @Composable
 fun TripListPreview(){
     val exampleTripList = listOf(
-        Trip(name = "Denver", arrivalDate = 0, departureDate = 2000),
-        Trip(name = "Aurora", arrivalDate = 0, departureDate = 2000),
-        Trip(name = "Boulder", arrivalDate = 0, departureDate = 2000)
+        Trip(tripName = "Denver", arrivalDate = 0, departureDate = 2000, days=emptyArray()),
+        Trip(tripName = "Aurora", arrivalDate = 0, departureDate = 2000, days=emptyArray()),
+        Trip(tripName = "Boulder", arrivalDate = 0, departureDate = 2000, days=emptyArray())
     )
 
-    TripList(exampleTripList, {})
-}
-
-// This doesn't seem to work
-// I'm thinking we put the bulk of the activity thing in a separate function,
-// that way we can use the same thing in the activity and preview without changes.
-@Preview(showBackground = true)
-@Composable
-fun MainPreview2(){
-    MainActivity()
+    WandererTheme {
+        TripList(exampleTripList, {})
+    }
 }

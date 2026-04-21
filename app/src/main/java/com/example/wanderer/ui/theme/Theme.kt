@@ -9,35 +9,50 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.Typography
+
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = GreenMain,
+    onPrimary = Color.Black,
+    primaryContainer = GreenDark,
+    onPrimaryContainer = WhiteMain,
+    secondary = BlueGrey,
+    onSecondary = WhiteMain,
+    background = BlueBackground,
+    onBackground = WhiteMain,
+    surface = BlueBackground,
+    onSurface = WhiteMain,
+    surfaceVariant = BlueGrey,
+    onSurfaceVariant = WhiteMain
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+// We'll keep a version of LightColorScheme just in case,
+// but we'll default the theme to use DarkColorScheme.
+private val LightColorScheme = lightColorScheme(
+    primary = GreenMain,
+    onPrimary = Color.Black,
+    primaryContainer = GreenDark,
+    onPrimaryContainer = WhiteMain,
+    background = WhiteMain,
+    onBackground = Color.Black,
+    surface = WhiteMain,
+    onSurface = Color.Black
 )
 
 @Composable
 fun WandererTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Force dark theme by default as requested
+
+    darkTheme: Boolean = true,
+    // Set to false to prioritize your custom colors over Android's dynamic colors
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -45,7 +60,6 @@ fun WandererTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
@@ -55,4 +69,8 @@ fun WandererTheme(
         typography = Typography,
         content = content
     )
+
+
+
+
 }
