@@ -30,7 +30,6 @@ import com.example.wanderer.JsonStorage.loadAllTrips
 import com.example.wanderer.JsonStorage.loadTripByName
 import com.example.wanderer.JsonStorage.saveTripByName
 import kotlinx.serialization.json.Json
-import org.json.JSONArray
 
 
 // Activity for the Calendar.
@@ -43,43 +42,6 @@ class CalendarActivity : ComponentActivity() {
 
         // We'll send in a tripName via an Intent,
         // then this will load the JSON and select the appropriate trip.
-
-        // temporary JSON object
-        val allTripsData = JSONArray("""[{
-            "tripName":"b", 
-            "arrivalDate": 0,
-            "departureDate": 1,
-            days = [
-                {
-                "morning":
-                    {"name":"Koi Ponds",
-                    "type":"Activity",
-                    "priority":0,
-                    "address":""},
-                "midmorning":
-                    {"name":"",
-                    "type":"",
-                    "priority":0,
-                    "address":""},
-                "noon":
-                    {"name":"",
-                    "type":"",
-                    "priority":0,
-                    "address":""},
-                "afternoon":
-                    {"name":"",
-                    "type":"",
-                    "priority":0,
-                    "address":""},
-                "evening":
-                    {"name":"",
-                    "type":"",
-                    "priority":0,
-                    "address":""}
-                }
-            ]
-            }]""".trimMargin())
-
 
         // The trip MUST exist in the JSON when CalendarActivity is made or it'll crash.
         // Get the trip data associated with the given passed-in tripName
@@ -94,32 +56,10 @@ class CalendarActivity : ComponentActivity() {
         }
     }
 
+    // Exit activity. Passed to WCalendar composable.
     fun exit(){
         this.finish()
     }
-    //both calendar Activity and MainActivity pass tripJSON
-    //only calendar Activity passes day:Int. default is set as one
-    // so MainActivity pass does not error
-
-//    //function that sends UI back to TripView upon onClick ButtonExit
-//    fun ExitToMain () {
-//        val exitI = Intent(applicationContext.MainActivity)
-//        startActiivty(intent=exitI)
-//    }
-//
-//    //future handling for multi-day trips, error handling for if button exists in composable
-//    fun NextDay() {
-//        val nextI = Intent(applicationContext.CalendarActivity::class.java)
-//        nextI.putExtra("trip_name", tripName)
-//        nextI.puExtra("day", (day+1))
-//        startActivity(nextI)
-//    }
-//    fun PrevDay() {
-//        val nextI = Intent(applicationContext.CalendarActivity::class.java)
-//        nextI.putExtra("trip_name", tripName)
-//        nextI.putExtra("day", (day-1))
-//        startActivity(prevI)
-//    }
 }
 
 @Preview
@@ -148,40 +88,6 @@ fun WCalendarPreview(){
     }
 }
 
-
-
-// NOTE : I'm using a slightly different format. Pretty much the same.
-// See example trip JSON above for details. Need to document this more formally later.
-// Probably once it's more stabilized.
-
-//assumed JSON approach:
-// TODO adjust this comment
-//-days in trip in a JSON
-//-sectioned day timeslots are in an array or always length 5
-//TripA = { "TripName" : {
-//    "Day1": [
-//    { "Morning" : {
-//        "Activity1": {
-//        "Type" : "Flight",
-//        "Priority : "1",
-//        "Location" : "",
-//        "Time" : "9am",
-//        "Name" : "America FLTxxxx",
-//        "Notes" : "Baggage tags...",
-//    }
-//    },
-//        "Midmorning" : "",
-//        "Afternoon" : "",
-//        "Evening" : "",
-//        "Day Notes" : "Check-in",
-//    }
-//    ]
-//    //"Day2" : {...)
-//},    //end tripname value
-//    "Start-date" : "01062026",
-//    "End-date" : "01062026"
-//    "Total Days" : "1"
-//}
 
 
 //WCalendar main function, called with JSON data for a single day.

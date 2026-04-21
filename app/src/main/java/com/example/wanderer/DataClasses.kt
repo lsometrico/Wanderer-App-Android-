@@ -7,11 +7,43 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
+
+// The JSON in itineraries.json contains a list of trips.
+// Each trip composes of a name, arrivalDate, departureDate, and list of days.
+// Each day composes of a list of activities.
+// Each activity composes of a name, type, priority, address, starting hour, and starting minute.
+// Example JSON:
+//[
+//{
+//    "tripName": "trip name",
+//    "days": [
+//    {
+//        "activities": [
+//        {
+//            "name": "activity name",
+//            "type": "event",
+//            "priority": 2,
+//            "address": "addr",
+//            "hour": 7,
+//            "minute": 0
+//        }
+//        ]
+//    },
+//    {
+//        "activities": []
+//    },
+//    {
+//        "activities": []
+//    }
+//    ],
+//    "arrivalDate": 1776729600000,
+//    "departureDate": 1777075200000
+//}
+//]
+
 // A NOTE ABOUT SERIALIZABLE DATA CLASSES
 // The variable names given here must *exactly* match the field names in the JSON format,
 //  because they *are* the field names. Kotlin will use them as such.
-
-// Also I'll move all these to their own file later.
 
 // Data class for Activities.
 @Serializable
@@ -69,9 +101,7 @@ data class Day(var activities: MutableList<Activity>){
         // Create a default Day object.
         // All fields are initialized to default Activities.
         fun default(): Day{
-            // TODO empty array; this is here for compat while I'm working on it
             return Day(activities = mutableListOf())
-//            return Day(activities = mutableListOf(Activity.default(), Activity.default(), Activity.default(), Activity.default(), Activity.default()))
         }
     }
 }

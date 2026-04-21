@@ -22,7 +22,6 @@ import com.example.wanderer.JsonStorage.saveTrip
 import com.example.wanderer.ui.theme.WandererTheme
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
-import java.util.Date
 
 
 @Preview
@@ -39,7 +38,7 @@ fun TripEditorPreview(){
 
 // An entire trip editor.
 // The onConfirm function should reload the JSON and cause a recompose, and close this menu.
-// The onCancel functinon should just close this menu.
+// The onCancel function should just close this menu.
 @Composable
 fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip? = null){
     // Trip name.
@@ -77,7 +76,7 @@ fun TripEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip? = null){
             // Here, we use deleteTrip to delete the old data, in case the user changed the trip name in the edit.
             deleteTrip(context, trip.tripName)
             // Reassign fields, then save modified data
-            trip.tripName = name;
+            trip.tripName = name
             trip.arrivalDate = arrivalDate.selectedDateMillis!!
             trip.departureDate = departureDate.selectedDateMillis!!
             saveTrip(context, JSONObject(Json.encodeToString(trip)))

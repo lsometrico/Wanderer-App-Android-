@@ -4,14 +4,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
@@ -51,8 +47,7 @@ fun ActivityEditorPreview(){
 // trip should be the trip we're adding an activity to.
 // day is same as above.
 // activity should be non-null if we're editing; if non-null, fields will be prefilled.
-// timeslot should be non-null if we're editing,
-// and must be the timeslot that the activity is slotted into on the given day.
+// activityIndex should be non-null if we're editing, and should be the index of the passed activity in the given day.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityEditor(onConfirm: () -> Unit, onCancel: () -> Unit, trip: Trip, day: Int,
