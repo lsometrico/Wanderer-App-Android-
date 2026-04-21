@@ -8,22 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.wanderer.ui.theme.WandererTheme
 import org.json.JSONObject
-import java.util.*
-//import file with JSON functions
-//import .JSON-handling.kt
-import android.content.Intent
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,14 +24,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.example.wanderer.JsonStorage.loadAllTrips
 import com.example.wanderer.JsonStorage.loadTripByName
 import com.example.wanderer.JsonStorage.saveTripByName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
-import kotlin.jvm.java
+
 
 // Activity for the Calendar.
 // Must be passed the tripName of the trip being opened.
@@ -104,6 +96,55 @@ class CalendarActivity : ComponentActivity() {
 
     fun exit(){
         this.finish()
+    }
+    //both calendar Activity and MainActivity pass tripJSON
+    //only calendar Activity passes day:Int. default is set as one
+    // so MainActivity pass does not error
+
+//    //function that sends UI back to TripView upon onClick ButtonExit
+//    fun ExitToMain () {
+//        val exitI = Intent(applicationContext.MainActivity)
+//        startActiivty(intent=exitI)
+//    }
+//
+//    //future handling for multi-day trips, error handling for if button exists in composable
+//    fun NextDay() {
+//        val nextI = Intent(applicationContext.CalendarActivity::class.java)
+//        nextI.putExtra("trip_name", tripName)
+//        nextI.puExtra("day", (day+1))
+//        startActivity(nextI)
+//    }
+//    fun PrevDay() {
+//        val nextI = Intent(applicationContext.CalendarActivity::class.java)
+//        nextI.putExtra("trip_name", tripName)
+//        nextI.putExtra("day", (day-1))
+//        startActivity(prevI)
+//    }
+}
+
+@Preview
+@Composable
+fun WCalendarPreview(){
+    //if anyone wants to try to make our JSON in Kotlin, knock yourself out. ¯\_ (ツ)_/¯
+
+    fun fakeExit(){}
+    
+    // Create a fake JSONObject for the preview
+    val fakeTrip = JSONObject("""{
+        "tripName":"Preview Trip",
+        "arrivalDate": 0,
+        "departureDate": 1,
+        "days": [
+            {
+                "activities": [
+                    {"name":"Sample Activity", "type":"Sightseeing", "priority":1, "address":"123 Main St", "hour":10, "minute":30}
+                ]
+            }
+        ]
+    }""")
+
+    WandererTheme {
+        WCalendar(fakeTrip, exit = ::fakeExit)
     }
 }
 
@@ -177,40 +218,95 @@ fun WCalendar (tripData: JSONObject, exit: () -> Unit) {
     }
 
 
+
+    // deep in the trenches here now
+    // this is the whole menu themeing in one function using everything
     WandererTheme{
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {
-                // Display trip name and date.
-                Text(trip.tripName)
-                Text("Day $day")
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            bottomBar = {
+                // this is a bottom bar to flip between days and add new stuff
+                // note: i need to find a way to make it scrollable because the screen
+                // can only fit so much in
+                Surface(tonalElevation = 3.dp) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            // previous day button
+                            FilledTonalButton(
+                                onClick = { day -= 1 },
+                                enabled = day > 0,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = null)
+                                Text("Prev")
+                            }
+
+                            Spacer(Modifier.width(8.dp))
+
+                            // add a new activity to the day
+                            Button(
+                                onClick = { showAddActivityMenu = true },
+                                modifier = Modifier.weight(1.2f)
+                            ) {
+                                Icon(Icons.Default.Add, contentDescription = null)
+                                Text("New")
+                            }
+
+                            Spacer(Modifier.width(8.dp))
+
+                            // next day button
+                            FilledTonalButton(
+                                onClick = { day += 1 },
+                                enabled = day < trip.days.size - 1,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Next")
+                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+                            }
+                        }
+
+                        // exit / go back to trip view
+                        TextButton(
+                            onClick = exit,
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                        ) {
+                            Text("Exit to Trips", color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+            }
+        ) { innerPadding ->
+            // where the displayed activities will be at
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp)
+                    .fillMaxSize()
+            ) {
+                Spacer(Modifier.height(24.dp))
+                // show trip name and date
+                Text(
+                    text = trip.tripName,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = MaterialTheme.typography.headlineLarge.fontFamily
+                    ),
+                    color = MaterialTheme.colorScheme.primary
+                )
+                // display what day in the trip it is
+                Text(
+                    text = "Day ${day + 1}",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+
+                Spacer(Modifier.height(16.dp))
 
                 // List of time slots.
                 ActivityList(trip, day, ::reloadJson)
-
-                // Controls at the bottom.
-                Row{
-                    // New activity button
-                    Button(onClick = {showAddActivityMenu = true}){
-                        Text("New Activity")
-                    }
-                    // Only display the prev day button if there's days prior.
-                    if(day > 0){
-                        Button(onClick = {day -= 1}){
-                            Text("Previous day")
-                        }
-                    }
-                    // Only display the next day button if there's another day to display.
-                    if(day < tripData.getJSONArray("days").length() - 1){
-                        Button(onClick = {day += 1}){
-                            Text("Next day")
-                        }
-                    }
-                }
-
-                // Button to exit.
-                Button(onClick = exit){
-                    Text("Exit")
-                }
 
                 // Needed to do the hacky force recompose thing.
                 // If it's not here then it just seems to ignore writes to forceRecompose.
@@ -223,10 +319,10 @@ fun WCalendar (tripData: JSONObject, exit: () -> Unit) {
                     ActivityEditor(onConfirm = ::confirmAddEditActivity,
                                     onCancel = {showAddActivityMenu = false}, trip, day)
                 }
-            } // end Column
-        } // end Scaffold
-    } // end WandererTheme
-} // end WCalendar
+            }
+        }
+    }
+}
 
 
 // Displays one activity.
@@ -252,73 +348,90 @@ fun DisplayActivity(activity: Activity,
 
     val context = LocalContext.current
 
-    Row{
-        // Display information about the activity; name, type, priority
-        Column{
-            Text(activity.name)
-            Text("type: " + activity.type + ", Priority: " + activity.priority)
-            TimeDisplay(activity.hour, activity.minute)
-        }
-
-        // Spacer so that the stuff before is left aligned and the stuff after is right aligned.
-        // I'm not sure how to have a spacer the size of the Down button so the up buttons are all aligned.
-        Spacer(Modifier.weight(1f))
-
-        // Buttons for swapping up and down; only appears if you *can* swap up and down.
-        if (swapUp != null){
-            Button(onClick = swapUp){
-                Text("↑")
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Display information about the activity; name, type, priority
+            Column(modifier = Modifier.weight(1f)) {
+                TimeDisplay(activity.hour, activity.minute)
+                Text(
+                    text = activity.name,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+                Text(
+                    text = "${activity.type} • Priority ${activity.priority}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                )
             }
-        }
-        if (swapDown != null) {
-            Button(onClick = swapDown) {
-                Text("↓")
-            }
-        }
 
-        // Button to edit the activity.
-        Button(onClick = {editActivityOpen = true}){
-            Text("Edit")
-        }
-
-        // Button to delete activity
-        Button(onClick = {deleteDialogOpen = true}){
-            Text("Delete")
-        }
-
-        // Delete dialog
-        if(deleteDialogOpen){
-            Dialog(onDismissRequest = {deleteDialogOpen = false}){
-                Column{
-                    Text("Are you sure you want to delete?")
-                    Row{
-                        // delete
-                        Button(onClick = {
-                            trip.days[day].activities.removeAt(activityIndex)
-                            saveTripByName(context, JSONObject(Json.encodeToString(trip)))
-                            onEditConfirm()
-                            deleteDialogOpen = false
-                        }){
-                            Text("Yes")
+            // Buttons for swapping up and down; only appears if you *can* swap up and down.
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column {
+                    if (swapUp != null) {
+                        IconButton(onClick = swapUp, modifier = Modifier.size(32.dp)) {
+                            Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Move Up", tint = MaterialTheme.colorScheme.primary)
                         }
-                        Button(onClick = {deleteDialogOpen = false}){
-                            Text("No")
+                    }
+                    if (swapDown != null) {
+                        IconButton(onClick = swapDown, modifier = Modifier.size(32.dp)) {
+                            Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Move Down", tint = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
+
+                // Button to edit the activity.
+                IconButton(onClick = {editActivityOpen = true}){
+                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.primary)
+                }
+
+                // Button to delete activity
+                IconButton(onClick = {deleteDialogOpen = true}){
+                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
+                }
             }
         }
+    }
+
+    // Delete dialog
+    if(deleteDialogOpen){
+        AlertDialog(
+            onDismissRequest = { deleteDialogOpen = false },
+            title = { Text("Delete Activity") },
+            text = { Text("Are you sure you want to delete this activity?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    trip.days[day].activities.removeAt(activityIndex)
+                    saveTripByName(context, JSONObject(Json.encodeToString(trip)))
+                    onEditConfirm()
+                    deleteDialogOpen = false
+                }) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteDialogOpen = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
 
-        // Activity Editor dialog.
-        if(editActivityOpen){
-            ActivityEditor( onConfirm = {onEditConfirm(); editActivityOpen = false},
-                            onCancel = {editActivityOpen = false},
-                            trip = trip,
-                            day = day,
-                            activity = activity,
-                            activityIndex = activityIndex)
-        }
+    // Activity Editor dialog.
+    if(editActivityOpen){
+        ActivityEditor( onConfirm = {onEditConfirm(); editActivityOpen = false},
+                        onCancel = {editActivityOpen = false},
+                        trip = trip,
+                        day = day,
+                        activity = activity,
+                        activityIndex = activityIndex)
     }
 }
 
@@ -341,7 +454,7 @@ fun ActivityList(trip: Trip, day: Int, onEditConfirm: () -> Unit){
     }
 
     Column{
-        for(i in 0..<trip.days[day].activities.size){
+        for(i in 0 until trip.days[day].activities.size){
 
             // If this isn't the first one in the list, pass a swapUp function; otherwise pass null.
             val swapUp = if(i > 0){
@@ -382,5 +495,10 @@ fun TimeDisplay(hour: Int, minute: Int){
         displayHour = 12
     }
 
-    Text(String.format("%02d:%02d %s", displayHour, minute, ampm))
+    Text(
+        text = String.format("%02d:%02d %s", displayHour, minute, ampm),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Bold
+    )
 }
