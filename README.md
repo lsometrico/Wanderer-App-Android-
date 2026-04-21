@@ -13,9 +13,9 @@ Wanderer is an Android application that will provide functionality as a travel i
 - Fully offline; no Internet connection required
 
 ## Setup & Usage
-Download the APK from the releases tab to your phone. Installation instructions will depend on your file manager; you may need to give your file manager permission to install apps. This link has a tutorial: https://www.androidauthority.com/how-to-install-apks-31494/
+Download the APK from the releases tab to your phone. Installation instructions will depend on your file manager; you may need to give your file manager permission to install apps. This link has a tutorial: https://www.androidauthority.com/how-to-install-apks-31494/. 
 
-Alternatively, to install from source, import the project into Android Studio. It is highly recommended to use physical device debugging rather than to attempt to use the emulator; the emulator may have bugs that don't exist on a physical device. To use physical device debugging, plug your phone into your computer, ensure it's the selected device (at the top, next to the run button), and hit the run button. Your phone must be in developer mode and have USB debugging enabled
+Alternatively, to install from source, import the project into Android Studio. It is highly recommended to use physical device debugging rather than to attempt to use the emulator; the emulator may have bugs that don't exist on a physical device. To use physical device debugging, plug your phone into your computer, ensure it's the selected device (at the top, next to the run button), and hit the run button. Your phone must be in developer mode and have USB debugging enabled.
 
 When starting the app, you will start on the trip list screen. Press the + button at the bottom to create a trip. Adjust settings accordingly. Then, press the trip card to enter the trip. Trips can also be edited from the trip list using the edit icon. To delete a trip, press the edit trip button and then the Delete button.
 
