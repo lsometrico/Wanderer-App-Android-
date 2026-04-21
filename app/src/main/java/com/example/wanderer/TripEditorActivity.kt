@@ -28,13 +28,9 @@ import java.util.Date
 @Preview
 @Composable
 fun TripEditorPreview(){
-    fun finalize_fn(oldName: String, name: String, arrivalDate: Date, departureDate: Date){
-
-    }
-
-    fun cancel(){
-
-    }
+    // Placeholder function; the buttons won't work since this function does nothing,
+    // but they're not really supposed to in the preview anyway.
+    fun cancel(){}
 
     WandererTheme {
         TripEditor(::cancel, ::cancel)

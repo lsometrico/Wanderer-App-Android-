@@ -29,13 +29,10 @@ import kotlinx.serialization.json.Json
 import org.json.JSONObject
 
 
+// Activity class for the Trip View; first view the user sees on starting up the app.
 class MainActivity : ComponentActivity() {
     // Ran on startup.
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Start up CalendarActivity.
-//        val intent = Intent(applicationContext, CalendarActivity::class.java)
-//        intent.putExtra("tripName", "iwi")
-//        startActivity(intent)
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -45,6 +42,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// Trip View composable.
 @Preview(showBackground = true)
 @Composable
 fun MainPreview(){
@@ -127,6 +125,7 @@ fun MainPreview(){
     }
 }
 
+// The card & buttons to display a Trip.
 @Composable
 fun TripButton(trip: Trip, onConfirm: () -> Unit){
     var openEditTripMenu by remember{mutableStateOf(false)}
